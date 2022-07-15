@@ -59,6 +59,7 @@ export default function HomePage() {
   const { partnerId } = router.query
 
   const partner = partnerId?.toString().slice(partnerId.length - 5)
+  console.log(partner);
 
   //--------------------------------------------------------------------
   // Context
