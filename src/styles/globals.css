@@ -642,7 +642,12 @@ span {
 .nft-heading {
   font-family: 'Montserrat Bold';
   font-weight: 900;
-  line-height: 0.98;
+  line-height: 1em;
+  display: block; /* or inline-block */
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow: hidden;
+  max-height: 2em;
 }
 .nft-subHeading {
   font-family: 'Montserrat Simple';

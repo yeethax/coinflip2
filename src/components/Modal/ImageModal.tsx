@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRouter } from 'next/router'
 
-import BulletPoint from '@/assests/images/bulletPoint.png';
+import BulletPoint from '@/assests/images/greenBulletPoint.png';
 import NextImage from "@/components/NextImage";
 import CloseIcon from "@/assests/icons/Close";
 
@@ -47,21 +47,14 @@ export const ImageModal: React.FC<Props> = ({ showModal, setShowModal, heading, 
 
                   <CloseIcon className="float-right w-8 h-8 cursor-pointer" onClick={() => setShowModal(false)} />
                 </div>
-                <div className="grid grid-cols-12 bg-primary-700 px-4 py-2 md:p-16 lg:px-4 lg:py-2 rounded-b-3xl">
-                  <div className="col-span-12 lg:col-span-5 rounded-3xl min-h-[70vw] lg:min-h-full" style={{
-                    backgroundImage: `url(${image})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "top center",
-                    backgroundSize: "cover"
-                  }}>
-                    {/* <NextImage
-                      id="NftImage"
-                      src={image}
-                      alt='NFT'
-                      className='w-72'
-                      width='100' 
-                      height='100'
-                    /> */}
+                <div className="grid grid-cols-12 bg-primary-700 px-4 py-4 md:p-16 lg:px-4 lg:py-6 rounded-b-3xl">
+                  <div className="col-span-12 lg:col-span-5 rounded-3xl min-h-[70vw] lg:min-h-full"
+                    style={{
+                      backgroundImage: `url(${image})`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "top center",
+                      backgroundSize: "cover"
+                    }}>
                   </div>
                   <div className="col-span-12 lg:col-span-7 px-4 py-2">
                     <p className="nft-heading text-white text-[5vw] lg:text-[50px] max-w-full">{heading}</p>

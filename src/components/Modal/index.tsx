@@ -5,6 +5,7 @@ import { useWindowSize } from 'react-use';
 import Winner from '../../assests/images/Coin_Winner_Icon.png';
 import Lose from '../../assests/images/GG_Coin.png';
 import NextImage from "@/components/NextImage";
+import TwitterWhite from "@/assests/icons/TwitterWhite";
 
 
 interface Props {
@@ -13,9 +14,11 @@ interface Props {
   winner?: boolean
   text: string
   InfoText?: string
+  tweetTitle?: string
+  tweetImage?: string
 }
 
-export const Modal: React.FC<Props> = ({ showModal, setShowModal, winner, text, InfoText }: Props) => {
+export const Modal: React.FC<Props> = ({ showModal, setShowModal, winner, text, InfoText, tweetTitle, tweetImage }: Props) => {
   const { width, height } = useWindowSize();
 
 
@@ -55,6 +58,16 @@ export const Modal: React.FC<Props> = ({ showModal, setShowModal, winner, text, 
                     {InfoText}
                   </p>
                 }
+
+                {tweetTitle && tweetImage &&
+                  <div className="flex items-center justify-center">
+                    <a className="px-7 py-3 flex items-center justify-center bg-[#00acee] text-white rounded-full"
+                      href={`https://twitter.com/intent/tweet?text=${tweetTitle} ${tweetImage}&name=coinflip&hashtags=coinflip,solana,cryptocurrency`}
+                      target="_blank"
+                      rel="noreferrer">
+                      Tweet
+                    </a>
+                  </div>}
               </div>
             </div>
           </div>

@@ -72,6 +72,8 @@ interface IAppContext {
   fetchAllSettledGames: () => void;
   fetchFailedGamesByUser: (user?: PublicKey) => void
   retryFailedBet: (gameId: string, gambler: string, amount: number) => void
+  winImageURL: string
+  lossImageURL: string
 }
 
 export const AppContext = React.createContext<IAppContext>({} as IAppContext);
@@ -128,6 +130,13 @@ export const AppProvider = ({ children }: Prop) => {
   const [playWinSound, { stop: stopWinSound }] = useSound(WinSound)
   const [playLossSound, { stop: stopLossSound }] = useSound(LossSound)
 
+
+  //--------------------------------------------------------------------
+  // Url Images to Embed
+  //--------------------------------------------------------------------
+
+  const winImageURL: string = "https://i.ibb.co/YdKBtBB/Whats-App-Image-2022-07-04-at-23-59-15.jpg"
+  const lossImageURL: string = "https://i.ibb.co/FVfQnjT/Whats-App-Image-2022-07-04-at-23-59-15-1.jpg"
 
   //--------------------------------------------------------------------
   // Side Effects
@@ -365,9 +374,6 @@ export const AppProvider = ({ children }: Prop) => {
     let payOut = data?.payout
     const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/993000533751242832/bL5u27D9W1dXVjBJ_4AJ37QgD-daU201PhICCKyAxB5nD0qqKNniNrT6XLdrNy54WO6K'
 
-    const winImageURL: string = "https://i.ibb.co/YdKBtBB/Whats-App-Image-2022-07-04-at-23-59-15.jpg"
-    const lossImageURL: string = "https://i.ibb.co/FVfQnjT/Whats-App-Image-2022-07-04-at-23-59-15-1.jpg"
-
     const embeds = {
       "embeds": [
         {
@@ -432,7 +438,9 @@ export const AppProvider = ({ children }: Prop) => {
         closeBetModals,
         closeLoader,
         getBalance,
-        sendToDiscord
+        sendToDiscord,
+        winImageURL,
+        lossImageURL
       }}
     >
       {children}

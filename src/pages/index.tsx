@@ -77,7 +77,8 @@ export default function HomePage() {
     playFlippingSound, stopFlippingSound,
     playWinSound, playLossSound,
     getBalance, sendToDiscord, fetchAllSettledGames,
-    closeBetModals, closeLoader, tableDatafromApi
+    closeBetModals, closeLoader, tableDatafromApi,
+    winImageURL, lossImageURL
   } = React.useContext(AppContext)
 
   //--------------------------------------------------------------------
@@ -270,6 +271,8 @@ export default function HomePage() {
           winner={winner}
           text={modalMessage}
           InfoText={modalInfoMessage}
+          tweetTitle={data?.message}
+          tweetImage={data?.won ? 'pic.twitter.com/fK7boph7Fg' : 'pic.twitter.com/At8FOIlI1I'}
         />
 
         {/* ======= Heading of Container ======== */}
