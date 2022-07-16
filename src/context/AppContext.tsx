@@ -71,7 +71,7 @@ interface IAppContext {
   sendToDiscord: () => void;
   fetchAllSettledGames: () => void;
   fetchFailedGamesByUser: (user?: PublicKey) => void
-  retryFailedBet: (gameId: string, gambler: string, amount: number) => void
+  retryFailedBet: (gameId: string, gambler: string, amount: number, multiplier: number, odds: number) => void
   winImageURL: string
   lossImageURL: string
   notifyRef: React.MutableRefObject<any>
