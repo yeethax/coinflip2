@@ -80,7 +80,6 @@ export const AppContext = React.createContext<IAppContext>({} as IAppContext);
 
 // ===> New Opts <=== //
 const opts: ConfirmOptions = {
-  preflightCommitment: 'processed', //"confirmed" is better but might not be strictly necessary
   commitment: 'confirmed', // "finalized is better"
 };
 
@@ -219,7 +218,7 @@ export const AppProvider = ({ children }: Prop) => {
     if (!wallet) {
       return;
     }
-    const provider = new AnchorProvider(new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "finalized"), wallet, opts);
+    const provider = new AnchorProvider(new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed"), wallet, opts);
     const program = new Program(idl, programId, provider);
     const user = wallet?.publicKey
     var result: any[] = await program?.account.gameId.all([
