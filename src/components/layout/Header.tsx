@@ -24,7 +24,7 @@ export default function Header() {
   const wallet = useAnchorWallet();
 
   // AppContext
-  const { showNotification, handleClose, notifications, setShowNotification, openGiveAwayModal, setOpenGiveAwayModal, fetchFailedGamesByUser, retryFailedBet, retryBet, setRetryBet, loadingIndex, setLoadingIndex } = React.useContext(AppContext);
+  const { showNotification, notifyRef, handleClose, notifications, setShowNotification, openGiveAwayModal, setOpenGiveAwayModal, fetchFailedGamesByUser, retryFailedBet, retryBet, setRetryBet, loadingIndex, setLoadingIndex } = React.useContext(AppContext);
 
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -80,53 +80,69 @@ export default function Header() {
             {
               wallet &&
               <Popover>
-                <Popover.Button
-                  className="group flex items-center rounded-md text-base font-medium text-white hover:text-opacity-100 focus:outline-none"
-                >
-                  <span className='relative'>
-                    <Bell className='h-6 w-8 fill-white cursor-pointer' onClick={() => setShowNotification(true)} />
-                    {notifications?.length > 0 && <span className="inline-block absolute top-0 -right-1 w-2 h-2 mr-2 bg-red-600 rounded-full"></span>}
-                  </span>
-                </Popover.Button>
+                {({ open }) => (
+                  <>
+                    <Popover.Button
+                      className="group flex items-center rounded-md text-base font-medium text-white hover:text-opacity-100 focus:outline-none"
+                    >
+                      <button className='relative'
+                        id='notify'
+                        ref={notifyRef}
+                        onClick={() => setShowNotification(true)}>
+                        <Bell className='h-6 w-8 fill-white cursor-pointer' />
+                        {notifications?.length > 0 && <span className="inline-block absolute top-0 -right-1 w-2 h-2 mr-2 bg-red-600 rounded-full"></span>}
+                      </button>
+                    </Popover.Button>
 
-                <Popover.Panel className="bg-[#283345] right-1 shadow-[0_3px_19px_0_rgba(0, 0, 0, 0.23)] absolute lg:right-6 lg:top-20 rounded-xl z-10 mt-3 min-w-[96vw] lg:min-w-[460px] max-w-[460px] px-4 sm:px-0">
-                  {wallet &&
-                    <div>
-                      <div className='py-3 lg:p-5'>
-                        <p className='text-center text-[#e9cb70]'>Notifications</p>
-                        {notifications?.length > 0 &&
-                          <div className='overflow-auto max-h-[500px]'>
-                            {notifications?.map((n: any, i: number) =>
-                              <div key={n?.gameId} className='bg-[#344258] px-3 my-4 rounded-3xl py-6 grid grid-cols-12 justify-between items-center'>
-                                <div className='col-span-1'>
-                                  <WarningIcon className='h-8 w-8 fill-[#4ae288]' />
+                    <Transition
+                      show={showNotification}
+                      enter="transition ease-out duration-200"
+                      enterFrom="opacity-0 translate-y-1"
+                      enterTo="opacity-100 translate-y-0"
+                      leave="transition ease-in duration-150"
+                      leaveFrom="opacity-100 translate-y-0"
+                      leaveTo="opacity-0 translate-y-1"
+                    >
+                      <Popover.Panel static className="bg-[#283345] shadow-[0_3px_19px_0_rgba(0, 0, 0, 0.23)] absolute -right-[3.5em] lg:-left-[6em] lg:top-10 rounded-xl z-10 mt-3 min-w-[100vw] lg:min-w-[460px] max-w-[460px] px-4 sm:px-0">
+                        {wallet &&
+                          <div>
+                            <div className='py-3 lg:p-5'>
+                              <p className='text-center mb-2 text-[#e9cb70]'>Notifications</p>
+                              {notifications?.length > 0 &&
+                                <div className='overflow-auto max-h-[500px]'>
+                                  {notifications?.map((n: any, i: number) =>
+                                    <div key={n?.gameId} className='bg-[#344258] px-3 my-4 rounded-3xl py-6 grid grid-cols-12 justify-between items-center'>
+                                      <div className='col-span-1'>
+                                        <WarningIcon className='h-8 w-8 fill-[#4ae288]' />
+                                      </div>
+                                      <div className='col-span-10 px-4'>
+                                        <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} $SOL</p>
+                                        <p className='lg:text-sm semi-bold text-white text-[9px] leading-3 lg:leading-6'>Solana network failed transaction. Dont worry! Click retry to try again 👉</p>
+                                      </div>
+                                      <div className='col-span-1'>
+                                        {loadingIndex !== i ?
+                                          <span onClick={() => handleRetryBet(n, i)}>
+                                            <RetryIcon className='h-7 w-7 lg:h-8 lg:w-8 cursor-pointer'
+                                            />
+                                          </span>
+                                          : <p className='dot-typing'></p>
+                                        }
+                                        {/* {loadingIndex === i && } */}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className='col-span-10 px-4'>
-                                  <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} $SOL</p>
-                                  <p className='lg:text-sm semi-bold text-white text-[9px] leading-3 lg:leading-6'>Solana network failed transaction. Dont worry! Click retry to try again 👉</p>
-                                </div>
-                                <div className='col-span-1'>
-                                  {loadingIndex !== i ?
-                                    <span onClick={() => handleRetryBet(n, i)}>
-                                      <RetryIcon className='h-7 w-7 lg:h-8 lg:w-8 cursor-pointer'
-                                      />
-                                    </span>
-                                    : <p className='dot-typing'></p>
-                                  }
-                                  {/* {loadingIndex === i && } */}
-                                </div>
+                              }
+                              <div className={clsx('flex justify-center items-center', notifications?.length === 0 && "mt-8")}>
+                                <Popover.Button className='bg-[#344258] px-6 py-2 my-4 text-white rounded-full' onClick={handleClose}>Close</Popover.Button>
                               </div>
-                            )}
+                            </div>
                           </div>
                         }
-                        <div className={clsx('flex justify-center items-center', notifications?.length === 0 && "mt-8")}>
-                          <Popover.Button className='bg-[#344258] px-6 py-2 my-4 text-white rounded-full' onClick={handleClose}>Close</Popover.Button>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </Popover.Panel>
-
+                      </Popover.Panel>
+                    </Transition>
+                  </>
+                )}
               </Popover>
             }
 
@@ -216,56 +232,73 @@ export default function Header() {
               {
                 wallet &&
                 <Popover>
-                  <Popover.Button
-                    className="group flex items-center rounded-md text-base font-medium text-white hover:text-opacity-100 focus:outline-none"
-                  >
-                    <span className='relative'>
-                      <Bell className='h-6 w-8 fill-white cursor-pointer' onClick={() => setShowNotification(true)} />
-                      {notifications?.length > 0 && <span className="inline-block absolute top-0 -right-1 w-2 h-2 mr-2 bg-red-600 rounded-full"></span>}
-                    </span>
-                  </Popover.Button>
+                  {({ open }) => (
+                    <>
+                      <Popover.Button
+                        className="group flex items-center rounded-md text-base font-medium text-white hover:text-opacity-100 focus:outline-none"
+                      >
+                        <button className='relative'
+                          id='notify'
+                          ref={notifyRef}
+                          onClick={() => setShowNotification(true)}>
+                          <Bell className='h-6 w-8 fill-white cursor-pointer' />
+                          {notifications?.length > 0 && <span className="inline-block absolute top-0 -right-1 w-2 h-2 mr-2 bg-red-600 rounded-full"></span>}
+                        </button>
+                      </Popover.Button>
 
-                  <Popover.Panel className="bg-[#283345] shadow-[0_3px_19px_0_rgba(0, 0, 0, 0.23)] absolute lg:right-6 lg:top-20 rounded-xl z-10 mt-3 min-w-[100vw] lg:min-w-[460px] max-w-[460px] px-4 sm:px-0">
-                    {wallet &&
-                      <div>
-                        <div className='py-3 lg:p-5'>
-                          <p className='text-center text-[#e9cb70]'>Notifications</p>
-                          {notifications?.length > 0 &&
-                            <div className='overflow-auto max-h-[500px]'>
-                              {notifications?.map((n: any, i: number) =>
-                                <div key={n?.gameId} className='bg-[#344258] px-3 my-4 rounded-3xl py-6 grid grid-cols-12 justify-between items-center'>
-                                  <div className='col-span-1'>
-                                    <WarningIcon className='h-8 w-8 fill-[#4ae288]' />
+                      <Transition
+                        show={showNotification}
+                        enter="transition ease-out duration-200"
+                        enterFrom="opacity-0 translate-y-1"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="transition ease-in duration-150"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-1"
+                      >
+                        <Popover.Panel static className="bg-[#283345] shadow-[0_3px_19px_0_rgba(0, 0, 0, 0.23)] absolute -left-[6em] lg:top-10 rounded-xl z-10 mt-3 min-w-[100vw] lg:min-w-[460px] max-w-[460px] px-4 sm:px-0">
+                          {wallet &&
+                            <div>
+                              <div className='py-3 lg:p-5'>
+                                <p className='text-center mb-2 text-[#e9cb70]'>Notifications</p>
+                                {notifications?.length > 0 &&
+                                  <div className='overflow-auto max-h-[500px]'>
+                                    {notifications?.map((n: any, i: number) =>
+                                      <div key={n?.gameId} className='bg-[#344258] px-3 my-4 rounded-3xl py-6 grid grid-cols-12 justify-between items-center'>
+                                        <div className='col-span-1'>
+                                          <WarningIcon className='h-8 w-8 fill-[#4ae288]' />
+                                        </div>
+                                        <div className='col-span-10 px-4'>
+                                          <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} $SOL</p>
+                                          <p className='lg:text-sm semi-bold text-white text-[9px] leading-3 lg:leading-6'>Solana network failed transaction. Dont worry! Click retry to try again 👉</p>
+                                        </div>
+                                        <div className='col-span-1'>
+                                          {loadingIndex !== i ?
+                                            <span onClick={() => handleRetryBet(n, i)}>
+                                              <RetryIcon className='h-7 w-7 lg:h-8 lg:w-8 cursor-pointer'
+                                              />
+                                            </span>
+                                            : <p className='dot-typing'></p>
+                                          }
+                                          {/* {loadingIndex === i && } */}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                  <div className='col-span-10 px-4'>
-                                    <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} $SOL</p>
-                                    <p className='lg:text-sm semi-bold text-white text-[9px] leading-3 lg:leading-6'>Solana network failed transaction. Dont worry! Click retry to try again 👉</p>
-                                  </div>
-                                  <div className='col-span-1'>
-                                    {loadingIndex !== i ?
-                                      <span onClick={() => handleRetryBet(n, i)}>
-                                        <RetryIcon className='h-7 w-7 lg:h-8 lg:w-8 cursor-pointer'
-                                        />
-                                      </span>
-                                      : <p className='dot-typing'></p>
-                                    }
-                                    {/* {loadingIndex === i && } */}
-                                  </div>
+                                }
+                                <div className={clsx('flex justify-center items-center', notifications?.length === 0 && "mt-8")}>
+                                  <Popover.Button className='bg-[#344258] px-6 py-2 my-4 text-white rounded-full' onClick={handleClose}>Close</Popover.Button>
                                 </div>
-                              )}
+                              </div>
                             </div>
                           }
-                          <div className={clsx('flex justify-center items-center', notifications?.length === 0 && "mt-8")}>
-                            <Popover.Button className='bg-[#344258] px-6 py-2 my-4 text-white rounded-full' onClick={handleClose}>Close</Popover.Button>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </Popover.Panel>
-
+                        </Popover.Panel>
+                      </Transition>
+                    </>
+                  )}
                 </Popover>
               }
 
+              {/* <button id="check" onClick={() => alert("it works")}>check</button> */}
 
               {!wallet && (
                 <div>

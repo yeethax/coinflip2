@@ -78,7 +78,7 @@ export default function HomePage() {
     playWinSound, playLossSound,
     getBalance, sendToDiscord, fetchAllSettledGames,
     closeBetModals, closeLoader, tableDatafromApi,
-    winImageURL, lossImageURL
+    winImageURL, lossImageURL, notifyRef
   } = React.useContext(AppContext)
 
   //--------------------------------------------------------------------
@@ -187,7 +187,7 @@ export default function HomePage() {
     } catch (error) {
       setFlippingCoin(false);
       setTimeout(closeLoader, 500);
-      setTimeout(fetchFailedGamesByUser, 15000);
+      setTimeout(fetchFailedGamesByUser, 5000);
       console.log(error);
     }
   };
@@ -271,8 +271,9 @@ export default function HomePage() {
           winner={winner}
           text={modalMessage}
           InfoText={modalInfoMessage}
-          tweetTitle={data?.message}
-          tweetImage={data?.won ? 'pic.twitter.com/fK7boph7Fg' : 'pic.twitter.com/At8FOIlI1I'}
+          showTweet={data?.won}
+          tweetTitle={`Won ${data?.payout} $SOL on @justcoinflip 🎉 2.5X your Solana here: justcoinflip.xyz`}
+          tweetImage="pic.twitter.com/yJ4XWbDI3Q"
         />
 
         {/* ======= Heading of Container ======== */}

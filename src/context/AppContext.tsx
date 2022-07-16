@@ -74,6 +74,7 @@ interface IAppContext {
   retryFailedBet: (gameId: string, gambler: string, amount: number) => void
   winImageURL: string
   lossImageURL: string
+  notifyRef: React.MutableRefObject<any>
 }
 
 export const AppContext = React.createContext<IAppContext>({} as IAppContext);
@@ -99,8 +100,10 @@ export const AppProvider = ({ children }: Prop) => {
     const program = new Program(idl, programId, provider);
   }
 
+  const notifyRef = React.useRef<any>(null);
 
-  const [showNotification, setShowNotification] = React.useState<boolean>(true);
+  const [isNotificationTrigger, setNotificationTrigger] = React.useState<boolean>(false);
+  const [showNotification, setShowNotification] = React.useState<boolean>(false);
   const [notifications, setNotifications] = React.useState<any>([])
 
   const [balance, setBalance] = React.useState<number | null>(null);
@@ -156,6 +159,7 @@ export const AppProvider = ({ children }: Prop) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallet]);
 
+  // Show Modal on Win | Loss
   React.useEffect(() => {
     if (data?.won === true) {
       playWinSound()
@@ -167,7 +171,7 @@ export const AppProvider = ({ children }: Prop) => {
       setTimeout(closeBetModals, 10000);
       sendToDiscord()
       fetchAllSettledGames()
-      fetchFailedGamesByUser()
+      setTimeout(fetchFailedGamesByUser, 15000);
       getBalance()
       setShowNotification(false)
     } else if (data?.won === false) {
@@ -180,7 +184,7 @@ export const AppProvider = ({ children }: Prop) => {
       setTimeout(closeBetModals, 5000);
       sendToDiscord()
       fetchAllSettledGames()
-      fetchFailedGamesByUser()
+      setTimeout(fetchFailedGamesByUser, 3000);
       getBalance()
       setShowNotification(false)
     }
@@ -192,6 +196,7 @@ export const AppProvider = ({ children }: Prop) => {
     if (data?.result.includes("Error") || data?.result.status === 404) {
       closeLoader()
       stopFlippingSound()
+      setTimeout(fetchFailedGamesByUser, 15000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -200,16 +205,22 @@ export const AppProvider = ({ children }: Prop) => {
   React.useEffect(() => {
     if (data?.won === true || false) {
       setTimeout(getBalance, 10000);
-      setTimeout(fetchAllSettledGames, 10000);
+      setTimeout(fetchAllSettledGames, 5000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.reslt]);
 
   // showing notification badge
   React.useEffect(() => {
-    if (notifications?.lenght > 0) setShowNotification(true)
+    console.log({ notifications })
+    if (notifications?.length > 0) {
+      setShowNotification(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet, notifications])
+  }, [notifications])
+
+
+  // const notifyMe = () => { notifyRef?.current?.click(); setTriggerNotification(true) }
 
   //--------------------------------------------------------------------
   // Callbacks
@@ -219,6 +230,7 @@ export const AppProvider = ({ children }: Prop) => {
     if (!wallet) {
       return;
     }
+    console.log("fetching failed bets now")
     const provider = new AnchorProvider(new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "finalized"), wallet, opts);
     const program = new Program(idl, programId, provider);
     const user = wallet?.publicKey
@@ -440,7 +452,8 @@ export const AppProvider = ({ children }: Prop) => {
         getBalance,
         sendToDiscord,
         winImageURL,
-        lossImageURL
+        lossImageURL,
+        notifyRef
       }}
     >
       {children}
