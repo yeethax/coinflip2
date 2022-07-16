@@ -101,7 +101,6 @@ export const AppProvider = ({ children }: Prop) => {
 
   const notifyRef = React.useRef<any>(null);
 
-  const [isNotificationTrigger, setNotificationTrigger] = React.useState<boolean>(false);
   const [showNotification, setShowNotification] = React.useState<boolean>(false);
   const [notifications, setNotifications] = React.useState<any>([])
 
@@ -167,7 +166,7 @@ export const AppProvider = ({ children }: Prop) => {
       setWinner(true);
       setModalMessage(data?.message);
       setModalInfoMessage("Your balance may take a few seconds to adjust on the blockchain")
-      setTimeout(closeBetModals, 10000);
+      setTimeout(closeBetModals, 20000);
       sendToDiscord()
       fetchAllSettledGames()
       setTimeout(fetchFailedGamesByUser, 15000);
@@ -195,6 +194,7 @@ export const AppProvider = ({ children }: Prop) => {
     if (data?.result.includes("Error") || data?.result.status === 404) {
       closeLoader()
       stopFlippingSound()
+      setShowNotification(false)
       setTimeout(fetchFailedGamesByUser, 15000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -209,10 +209,9 @@ export const AppProvider = ({ children }: Prop) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.reslt]);
 
-  // showing notification badge
+  // // showing notification badge
   React.useEffect(() => {
-    console.log({ notifications })
-    if (notifications?.length > 0) {
+    if (notifications?.length > 0 && !showModal) {
       setShowNotification(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -289,9 +288,13 @@ export const AppProvider = ({ children }: Prop) => {
       setLoadingIndex(null)
       setData(resultData);
       setShowNotification(true)
+      setTimeout(fetchFailedGamesByUser, 2000);
+      setTimeout(fetchAllSettledGames, 2000);
       setRetryBet(false)
     } catch (error) {
       setTimeout(closeLoader, 500);
+      setTimeout(fetchFailedGamesByUser, 2000);
+      setTimeout(fetchAllSettledGames, 2000);
       console.log(error);
     }
   };
