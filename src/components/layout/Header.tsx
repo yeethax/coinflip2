@@ -53,11 +53,12 @@ export default function Header() {
   }, [wallet, base58]);
 
   const handleRetryBet = async (notification: any, i: number) => {
-    const { gameId, gambler, amount } = notification
-
+    const { gameId, gambler, amount, odds } = notification
+    let multiplierMap: any = { 40: 2.5, 50: 2, 60: 1.66 };
+    var multiplier = multiplierMap[odds];
     setLoadingIndex(i)
     setRetryBet(true)
-    await retryFailedBet(gameId, gambler, amount)
+    await retryFailedBet(gameId, gambler, amount, multiplier, odds);
   }
 
 

@@ -177,7 +177,7 @@ export default function HomePage() {
       let optsStr = 'confirmed';
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",

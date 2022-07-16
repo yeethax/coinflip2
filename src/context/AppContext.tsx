@@ -245,7 +245,10 @@ export const AppProvider = ({ children }: Prop) => {
 
 
     var result: any[] = result.map((obj) => {
-      let r: FailedBet = { gameId: obj?.publicKey?.toBase58(), gambler: obj?.account.gambler.toBase58(), amount: obj?.account.amount.toNumber() / LAMPORTS_PER_SOL }
+      let r: FailedBet = {
+        gameId: obj?.publicKey?.toBase58(), gambler: obj?.account.gambler.toBase58(), amount: obj?.account.amount.toNumber() / LAMPORTS_PER_SOL,
+        odds: obj?.account.odds
+      }
       return r
     })
 
@@ -253,7 +256,7 @@ export const AppProvider = ({ children }: Prop) => {
     setNotifications(result)
   }
 
-  const retryFailedBet = async (gameId: string, gambler: string, amount: number) => {
+  const retryFailedBet = async (gameId: string, gambler: string, amount: number, multiplier: number, odds: number) => {
 
     try {
       console.log('Retrying bet');
@@ -264,7 +267,7 @@ export const AppProvider = ({ children }: Prop) => {
       let optsStr = 'confirmed';
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
