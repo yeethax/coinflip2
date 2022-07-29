@@ -11,6 +11,8 @@ require('@solana/wallet-adapter-react-ui/styles.css');
 
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
+import 'simplebar/dist/simplebar.min.css';
+
 import '@/styles/globals.css';
 import { AppProvider } from '@/context/AppContext';
 

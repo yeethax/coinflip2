@@ -59,6 +59,10 @@ body {
   font-family: 'Montserrat';
 }
 
+#root {
+  border: 1px solid red;
+}
+
 /* table {
   border-collapse: collapse;
   border-collapse: separate;
@@ -145,6 +149,10 @@ span {
 
   .cursor-newtab {
     cursor: url('/images/new-tab.png') 10 10, pointer;
+  }
+
+  .custom-linear-bg {
+    background: linear-gradient(59deg, #ec9a01 47%, #edc800 68%);
   }
 
   /* #region  /**=========== Typography =========== */
