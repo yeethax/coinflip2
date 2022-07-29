@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import clsxm from '@/lib/clsxm';
 
@@ -29,7 +30,7 @@ const idl = require('@/idl/coinflip2');
 
 // ===> New Opts <=== //
 const opts: ConfirmOptions = {
-  preflightCommitment: 'processed', //"confirmed" is better but might not be strictly necessary
+  //preflightCommitment: 'processed', //"confirmed" is better but might not be strictly necessary
   commitment: 'confirmed', // "finalized is better"
 };
 
@@ -81,7 +82,8 @@ export default function HomePage() {
     playFlippingSound, stopFlippingSound,
     playWinSound, playLossSound,
     getBalance, sendToDiscord, fetchAllSettledGames,
-    closeBetModals, closeLoader, tableDatafromApi
+    closeBetModals, closeLoader, tableDatafromApi,
+    winImageURL, lossImageURL, notifyRef
   } = React.useContext(AppContext)
 
   //--------------------------------------------------------------------
@@ -190,7 +192,7 @@ export default function HomePage() {
     } catch (error) {
       setFlippingCoin(false);
       setTimeout(closeLoader, 500);
-      setTimeout(fetchFailedGamesByUser, 1500);
+      setTimeout(fetchFailedGamesByUser, 5000);
       console.log(error);
     }
   };
@@ -216,7 +218,7 @@ export default function HomePage() {
   };
 
   return (
-    <Layout title='Partner'>
+    <Layout title='Home'>
 
       <div className='container flex min-h-screen flex-col px-4 sm:px-6'>
         {/* ===================================== */}
@@ -274,6 +276,9 @@ export default function HomePage() {
           winner={winner}
           text={modalMessage}
           InfoText={modalInfoMessage}
+          showTweet={data?.won}
+          tweetTitle={`Won ${data?.payout} $SOL on @justcoinflip 🎉 2.5X your Solana here: justcoinflip.xyz`}
+          tweetImage="pic.twitter.com/yJ4XWbDI3Q"
         />
 
         {/* ======= Heading of Container ======== */}
