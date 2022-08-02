@@ -1,6 +1,7 @@
 
 import * as React from 'react';
 import clsxm from '@/lib/clsxm';
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import { AnchorProvider, BN, Program, web3 } from '@project-serum/anchor';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
@@ -37,6 +38,7 @@ import Select from '@/components/Select';
 //--------------------------------------------------------------------
 
 const idl = require('@/idl/coinflip2');
+const idlSpl = require('@/idl/coinflip2Spl');
 
 // ===> New Opts <=== //
 const opts: ConfirmOptions = {
@@ -46,13 +48,15 @@ const opts: ConfirmOptions = {
 
 const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
 const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
+const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!);
 const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed");
 const gameAccount = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_ACCOUNT!);
 const gameVault = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_VAULT!);
 const deployer = new web3.PublicKey(process.env.NEXT_PUBLIC_DEPLOYER!);
 const partner = 'HOUSE';
 const maxBetAmount = process.env.NEXT_PUBLIC_MAX_BET;
-
+const SplTokens = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
+const GameVaultSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
 //--------------------------------------------------------------------
 // Helper Function
 //--------------------------------------------------------------------
@@ -103,6 +107,13 @@ export default function HomePage() {
   //--------------------------------------------------------------------
   // Local States
   //--------------------------------------------------------------------
+
+  /// These values should be initialised  when the user has connected his wallet and choosen either DUST or CREK and everytime he switches his choice between those two
+  /// initialisation is playerATokStr =  await findAssociatedTokenAddress(wallet.publicKey,new web3.PublicKey(SplTokens[currency])) where currency is either "DUST" or "CREK"
+  /// initialisation is gameVaultATokStr =  await findAssociatedTokenAddress(new web3.PublicKey(GameVaultSplTokens[currency]),,new web3.PublicKey(SplTokens[currency])) where currency is either "DUST" or "CREK"
+
+  const [playerATokStr, setplayerATokStr] = React.useState<string>(''); //value
+  const [gameVaultATokStr, setgameVaultATokStr] = React.useState<string>(''); //value
 
   const [multiplier, setMultipler] = React.useState<number>(2.5);
   const [error, setError] = React.useState<boolean>(false);
@@ -241,9 +252,10 @@ export default function HomePage() {
       let gameIdStr = gameId.publicKey.toBase58();
       let gambler = provider.wallet.publicKey.toBase58() //TODO remove this string
       let optsStr = 'confirmed';
+      let currency = "SOL";
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr, gameVaultATokStr }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -260,6 +272,91 @@ export default function HomePage() {
       console.log(error);
     }
   };
+
+  // for custom token
+  const makeBetSpl = async (currency: string, randomValue?: string) => {
+    // currency is either "DUST" or "CREK" for now
+    //--------------------------------------------------------------------
+    // BEGINNING OF MODIFICATION sending the bet on blockchain
+    //--------------------------------------------------------------------
+    try {
+      console.log('In make bet');
+      if (!wallet) {
+        return;
+      }
+      setFlippingCoin(true);
+      playFlippingSound()
+      const selectedChoice = randomValue ?? choice;
+      const provider = new AnchorProvider(connection, wallet, opts);
+      const program = new Program(idlSpl, programIdSpl, provider);
+      //program and provider should be the ones initialised with initialisedEnv using the user wallet
+      const gameId = web3.Keypair.generate();
+      let multiplierMap: any = { 2.5: 40, 2: 50, 1.66: 60 };
+      let odds = multiplierMap[multiplier];
+      let mint = new web3.PublicKey(SplTokens[currency]);
+      var txBet = await program.methods
+        .makeBetSpl(
+          new BN(odds),
+          selectedChoice,
+          new BN(amount * LAMPORTS_PER_SOL),
+          partner
+        )
+        .accounts({
+          gambler: provider.wallet.publicKey,
+          gameAccount: gameAccount,
+          gameVault: gameVault,
+          gameId: gameId.publicKey,
+          manager: deployer,
+          systemProgram: web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          mint: mint,
+          gamblerAtokenacc: new web3.PublicKey(playerATokStr),
+          gameVaultAtokenacc: new web3.PublicKey(gameVaultATokStr)
+        })
+        .signers([gameId])
+        .rpc();
+
+      console.log('tx hsould be sent');
+
+      let gameIdStr = gameId.publicKey.toBase58();
+      let gambler = provider.wallet.publicKey.toBase58() //TODO remove this string
+      let optsStr = 'confirmed';
+
+      const response = await fetch(`${Api_Url}/makeBet`, {
+        method: 'POST',
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency, playerATokStr, gameVaultATokStr }),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+
+      const resultData = await response.json();
+      setData(resultData);
+    } catch (error) {
+      setFlippingCoin(false);
+      setTimeout(closeLoader, 500);
+      setTimeout(fetchFailedGamesByUser, 5000);
+      console.log(error);
+    }
+  };
+  const findAssociatedTokenAddress = async (
+    walletAddress: web3.PublicKey,
+    tokenMintAddress: web3.PublicKey,
+  ): Promise<string> => {
+    const ASSOCIATED_TOKEN_PROGRAM_ID = new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+    return (
+      await web3.PublicKey.findProgramAddress(
+        [
+          walletAddress.toBuffer(),
+          TOKEN_PROGRAM_ID.toBuffer(),
+          tokenMintAddress.toBuffer(),
+        ],
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      )
+    )[0].toString();
+  }
 
   const flipCoin = async () => {
     if (!(amount > max) && amount !== 0 && choice !== 'R') {

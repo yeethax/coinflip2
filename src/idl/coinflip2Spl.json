@@ -1,0 +1,479 @@
+{
+  "version": "0.1.0",
+  "name": "coinflip2Spl",
+  "instructions": [
+    {
+      "name": "initializeSpl",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "gameVault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "deployer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        },
+        {
+          "name": "maxBet",
+          "type": "u64"
+        },
+        {
+          "name": "fee",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "addManager",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "manager",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "removeManager",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "manager",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "makeBetSpl",
+      "accounts": [
+        {
+          "name": "gambler",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "gameAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "gameVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameId",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "manager",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "gamblerAtokenacc",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameVaultAtokenacc",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "odds",
+          "type": "u8"
+        },
+        {
+          "name": "choice",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "partner",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "settleBetSpl",
+      "accounts": [
+        {
+          "name": "gambler",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "gameVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameId",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "manager",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "gamblerAtokenacc",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameVaultAtokenacc",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "random",
+          "type": "u8"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "transferFundsSpl",
+      "accounts": [
+        {
+          "name": "recipient",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "manager",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "recipientAtokenacc",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "gameVaultAtokenacc",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "changeMaxbetspl",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "bet",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "changeFee",
+      "accounts": [
+        {
+          "name": "gameAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "fee",
+          "type": "u16"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "GameAccountSpl",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gameVault",
+            "type": "publicKey"
+          },
+          {
+            "name": "managers",
+            "type": {
+              "array": [
+                "publicKey",
+                3
+              ]
+            }
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "maxBet",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u16"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameIdSpl",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gambler",
+            "type": "publicKey"
+          },
+          {
+            "name": "odds",
+            "type": "u8"
+          },
+          {
+            "name": "choice",
+            "type": "string"
+          },
+          {
+            "name": "outcome",
+            "type": "string"
+          },
+          {
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "u64"
+          },
+          {
+            "name": "partner",
+            "type": "string"
+          },
+          {
+            "name": "spltoken",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidChoiceOrOutcome",
+      "msg": "Outcome or Choice is invalid"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidOdds",
+      "msg": "Odd is invalid"
+    },
+    {
+      "code": 6002,
+      "name": "NotManager",
+      "msg": "This account is not a manager"
+    },
+    {
+      "code": 6003,
+      "name": "ManagerAlreadyAuthorized",
+      "msg": "This account is already a manager"
+    },
+    {
+      "code": 6004,
+      "name": "ManagersQuotaReached",
+      "msg": "Manager quota is exceeded"
+    },
+    {
+      "code": 6005,
+      "name": "MaxBetAmount",
+      "msg": "Your betting amount is greater than the maximum"
+    },
+    {
+      "code": 6006,
+      "name": "BetIsSettled",
+      "msg": "Bet is already settled"
+    },
+    {
+      "code": 6007,
+      "name": "CannotRemoveOwner",
+      "msg": "Owner cannot be removed from managers"
+    },
+    {
+      "code": 6008,
+      "name": "BetIsNotInitialized",
+      "msg": "Bet is not initialized"
+    },
+    {
+      "code": 6009,
+      "name": "MinBetAmount",
+      "msg": "Bet amount below minimum bet amount"
+    }
+  ],
+  "metadata": {
+    "address": "5crreuTzoftUMAhL815E5WDuT2obk7cLstA2fmkEz5u7"
+  }
+}

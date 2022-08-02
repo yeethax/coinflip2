@@ -14,6 +14,7 @@ import LossSound from "@/assests/sounds/lossSound.mp3"
 import { PlayFunction } from "use-sound/dist/types";
 
 const idl = require('@/idl/coinflip2');
+const idlSpl = require('@/idl/coinflip2Spl');
 
 interface Prop {
   children: React.ReactNode;
@@ -89,7 +90,12 @@ const opts: ConfirmOptions = {
 const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
 //const Api_Url = 'https://justcoinflip.herokuapp.com'
 const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
+const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!);
+
 const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed");
+
+const SplTokens = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
+const GameVaultSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
 
 
 export const AppProvider = ({ children }: Prop) => {
@@ -228,6 +234,62 @@ export const AppProvider = ({ children }: Prop) => {
   // Callbacks
   //--------------------------------------------------------------------
 
+  const fetchFailedGamesByUserSpl = async (currency) => {
+    if (!wallet) {
+      return;
+    }
+    const provider = new AnchorProvider(new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed"), wallet, opts);
+    const program = new Program(idlSpl, programIdSpl, provider);
+    const user = wallet?.publicKey
+    const mint = new web3.PublicKey(SplTokens[currency])
+    var result: any[] = await program?.account.gameIdSpl.all([
+      //choice should be either H or T
+      {
+        memcmp: {
+          offset: 8, // Discriminator.
+          bytes: user?.toBase58(),
+        }
+      },
+      {
+        memcmp: {
+          offset: 8 + // Discriminator.
+            + 32 //pubkey,
+            + 1// u8
+            + 4 + 1//string prefix and one character
+            + 4 + 1//string prefix and one character
+            + 2 //2 bool
+            + 16 //2 u64
+            + 4 + 5 // 5 characters for partner
+          ,
+          bytes: mint?.toBase58(),
+        }
+      },
+      {
+        memcmp: {
+          offset: 8 + // Discriminator.
+            + 32 //pubkey,
+            + 1// u8
+            + 4 + 1//string prefix and one character
+            + 4 + 1//string prefix and one character
+          ,
+          bytes: base58?.encode([0]), //not settled
+        }
+      },
+    ]);
+
+
+    var result: any[] = result.map((obj) => {
+      let r: FailedBet = {
+        gameId: obj?.publicKey?.toBase58(), gambler: obj?.account.gambler.toBase58(), amount: obj?.account.amount.toNumber() / LAMPORTS_PER_SOL,
+        odds: obj?.account.odds,
+
+      }
+      return r
+    })
+
+    // return result
+    setNotifications(result)
+  }
   const fetchFailedGamesByUser = async () => {
     if (!wallet) {
       return;
@@ -268,7 +330,22 @@ export const AppProvider = ({ children }: Prop) => {
     // return result
     setNotifications(result)
   }
-
+  const findAssociatedTokenAddress = async (
+    walletAddress: web3.PublicKey,
+    tokenMintAddress: web3.PublicKey,
+  ): Promise<string> => {
+    const ASSOCIATED_TOKEN_PROGRAM_ID = new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+    return (
+      await web3.PublicKey.findProgramAddress(
+        [
+          walletAddress.toBuffer(),
+          TOKEN_PROGRAM_ID.toBuffer(),
+          tokenMintAddress.toBuffer(),
+        ],
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      )
+    )[0].toString();
+  }
   const retryFailedBet = async (gameId: string, gambler: string, amount: number, multiplier: number, odds: number) => {
 
     try {
@@ -281,6 +358,42 @@ export const AppProvider = ({ children }: Prop) => {
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
         body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds }),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+
+      const resultData = await response.json();
+      setLoadingIndex(null)
+      setData(resultData);
+      setShowNotification(true)
+      setTimeout(fetchFailedGamesByUser, 2000);
+      setTimeout(fetchAllSettledGames, 2000);
+      setRetryBet(false)
+    } catch (error) {
+      setTimeout(closeLoader, 500);
+      setTimeout(fetchFailedGamesByUser, 2000);
+      setTimeout(fetchAllSettledGames, 2000);
+      console.log(error);
+    }
+  };
+  const retryFailedBetSpl = async (gameId: string, gambler: string, amount: number, multiplier: number, odds: number, currency: string) => {
+
+    try {
+      console.log('Retrying bet');
+      setShowNotification(false)
+      //program and provider should be the ones initialised with initialisedEnv using the user wallet
+
+      let gameIdStr = gameId;
+      let optsStr = 'confirmed';
+      let mint = new web3.PublicKey(SplTokens[currency]);
+      let playerATokenacc = await findAssociatedTokenAddress(wallet?.publicKey, mint);
+      let gameVaultATokenacc = await findAssociatedTokenAddress(new web3.PublicKey(GameVaultSplTokens[currency]), mint);
+      const response = await fetch(`${Api_Url}/makeBet`, {
+        method: 'POST',
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokenacc, gameVaultATokenacc }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -324,6 +437,69 @@ export const AppProvider = ({ children }: Prop) => {
 
           bytes: base58.encode([1]),
         },
+      },
+    ]);
+
+    // converting date
+    let formatedData = result?.map((user: any, i: number) => {
+      const time = user?.account.timestamp.toString();
+      const date = new Date(time * 1000);
+      return { ...user, date };
+    });
+    //sortign array based on dateF
+    formatedData.sort(function (a, b) {
+      var dateA: any = new Date(a.date),
+        dateB: any = new Date(b.date);
+      return dateB - dateA;
+    });
+
+    const multiplier = (value: number) => {
+      if (value === 40) return 2.5
+      if (value === 50) return 2
+      if (value === 60) return 1.66
+    }
+
+    let filterOutZeroBets = formatedData?.slice(0, 10).filter((user: Player) => {
+      const multiply: any = multiplier(user.account.odds)
+      if ((user.account.amount.toString() * multiply) / LAMPORTS_PER_SOL !== 0) {
+        return user
+      }
+    })
+
+    setTableData(filterOutZeroBets);
+  };
+  const fetchAllSettledGamesSpl = async (currency: string) => {
+    const provider2 = new AnchorProvider(connection, Keypair.generate(), opts);
+    const program2 = new Program(idlSpl, programIdSpl, provider2);
+    const mint = new web3.PublicKey(SplTokens[currency]);
+    let result = await program2.account.gameIdSpl.all([
+      {
+        memcmp: {
+          offset:
+            8 + // Discriminator.
+            +32 + //pubkey,
+            1 + // u8
+            4 +
+            1 + //string prefix and one character
+            4 +
+            1, //string prefix and one character
+
+          bytes: base58.encode([1]),
+        },
+      },
+      {
+        memcmp: {
+          offset: 8 + // Discriminator.
+            + 32 //pubkey,
+            + 1// u8
+            + 4 + 1//string prefix and one character
+            + 4 + 1//string prefix and one character
+            + 2 //2 bool
+            + 16 //2 u64
+            + 4 + 5 // 5 characters for partner
+          ,
+          bytes: mint?.toBase58(),
+        }
       },
     ]);
 
