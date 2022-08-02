@@ -28,6 +28,8 @@ import Message from '@/components/Message';
 import SimpleBar from 'simplebar-react';
 import Clipboard from '@/assests/icons/Clipboard';
 import LeaderBoard from '@/components/LeaderBoard';
+import Dots from '@/components/Loader/Dots';
+import Select from '@/components/Select';
 
 
 //--------------------------------------------------------------------
@@ -83,6 +85,7 @@ export default function HomePage() {
     showModal, setShowModal,
     winner, setWinner,
     data, setData,
+    cryptoCurrency,
     playFlippingSound, stopFlippingSound,
     playWinSound, playLossSound,
     getBalance, sendToDiscord, fetchAllSettledGames,
@@ -144,6 +147,14 @@ export default function HomePage() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
+
+  const handleScroll = (e: any) => {
+    let element = e.target;
+    if (element.scrollTop === 0) {
+      //fetch messages
+      console.log("hi")
+    }
+  }
 
   const handleOnChange = (e: any) => {
     setNewMessage(e.target.value);
@@ -232,7 +243,7 @@ export default function HomePage() {
       let optsStr = 'confirmed';
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -368,7 +379,7 @@ export default function HomePage() {
               <div className='lg:hidden'>
                 <button
                   className={clsxm(
-                    'w-[16vw] m-auto mx-1 select-none rounded-full bg-primary-200 px-3 py-1 text-[7px] font-extrabold text-white md:py-3 lg:px-4 lg:py-2 lg:text-sm'
+                    'w-[16vw] m-auto mx-1 select-none rounded-full bg-primary-200 px-3 py-1 text-[2vw] font-extrabold text-white md:py-3 lg:px-4 lg:py-2 lg:text-sm'
                   )}
                 >
                   {choice === 'H'
@@ -390,6 +401,10 @@ export default function HomePage() {
               <p className='my-6 text-center text-lg font-extrabold text-white'>
                 Bet Settings
               </p>
+
+              <div className='mx-1 my-3 lg:mx-5'>
+                <Select />
+              </div>
 
               {/* ======= Muliplier Tabs ======== */}
               <div className='mx-1 lg:mx-5'>
@@ -428,6 +443,7 @@ export default function HomePage() {
               {/* ================================ */}
               {/* ======= Muliplier Input ======== */}
               {/* ================================ */}
+
               <BetInput
                 label='Bet Amount'
                 value={amount}
@@ -492,6 +508,7 @@ export default function HomePage() {
             {/* =============================== */}
             {/* ======= Coins Selection ======= */}
             {/* =============================== */}
+
             <Coins coin={choice} setCoin={setChoice} />
           </div>
         </div>
@@ -502,19 +519,20 @@ export default function HomePage() {
         {/* ==========Chat and leaderboards========== */}
         {/* ========================================= */}
 
-        <div className='my-10'>
+        {/* Hidden For Now Because Firebase is not functional yet */}
+
+        <div className='hidden my-10'>
 
           <div className='grid grid-cols-12 gap-4'>
             <div className='col-span-12 order-first lg:col-span-4'>
               <BulletHeading title='Global Chat' />
 
-              {/* =============================== */}
               {/* ======= Chat Section ========== */}
-              {/* =============================== */}
+
               <div className='bg-primary-600 mt-3 pt-4 rounded-xl'>
                 <div className='flex flex-col h-full'>
-                  <div className='px-2 max-w-screen-lg h-full overflow-hidden flex-1 mx-2'>
-                    <SimpleBar timeout={500} scrollableNodeProps={{ ref: scrollRef }} clickOnTrack={false} className="max-h-[460px]">
+                  <div className='px-2 max-w-screen-lg h-full overflow-hidden flex-1 m-2'>
+                    <SimpleBar timeout={500} scrollableNodeProps={{ ref: scrollRef }} clickOnTrack={false} className={clsxm(wallet ? "max-h-[398px]" : "max-h-[485px]")}>
                       {messagesList.map((user, i) =>
                         <div key={i}>
                           <Message image={user?.id === "1" ? image2 : image} message={user.text} username={user.username} time={user.time} user={user?.id === "1" ? true : false} />
@@ -532,12 +550,12 @@ export default function HomePage() {
                           {/* <div className='col-span-1 hidden md:block'><EmojiPicker value={newMessage} setValue={setNewMessage} /></div> */}
                           <div className='col-span-10'>
                             <input
+                              className='flex-1 border-none bg-primary-700 w-full text-white outline-none outline-0 focus:outline-none focus:outline-offset-0'
                               ref={inputRef}
                               type='text'
                               value={newMessage}
                               onChange={handleOnChange}
                               placeholder='Type message '
-                              className='flex-1 border-none bg-primary-700 w-full text-white outline-none outline-0 focus:outline-none focus:outline-offset-0'
                             />
                           </div>
                           <div className='col-span-2 flex justify-end'>
@@ -559,9 +577,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ==================================== */}
             {/* ======= Leader Board Section ======= */}
-            {/* ==================================== */}
+
             <div className='col-span-12 order-last lg:col-span-8'>
               <BulletHeading title='Highest Wins' />
 
@@ -579,7 +596,7 @@ export default function HomePage() {
                 </div>
 
                 <ul className='p-1 mt-2 md:mt-1 mx-4 md:p-4 md:mx-8'>
-                  <SimpleBar timeout={500} clickOnTrack={false} className="max-h-[460px]">
+                  <SimpleBar timeout={500} clickOnTrack={false} className="max-h-[410px]">
                     {leaderBoard.map((user, i) => <div key={i}><LeaderBoard id={i} name={user?.name} payout={user?.payout} /></div>)}
                   </SimpleBar>
                 </ul>
@@ -590,9 +607,9 @@ export default function HomePage() {
 
 
 
-        {/* ==================================== */}
-        {/* ==========All Bets Details========== */}
-        {/* ==================================== */}
+        {/* ========================================= */}
+        {/* ==========All Bets Detail Table========== */}
+        {/* ========================================= */}
 
         <div className='grid grid-cols-12' id="latestBets">
           {/* ======= Headings ======= */}
@@ -603,17 +620,8 @@ export default function HomePage() {
           {/* ===================== */}
           {/* ======= Table ======= */}
           {/* ===================== */}
-          {tableDatafromApi ? (<Table data={tableDatafromApi} wallet={Boolean(wallet)} />) : (
-            <div className='bouncing-loader mt-5 col-span-12 mb-40'>
 
-              {/* loadind Dots */}
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          )}
+          {tableDatafromApi ? <Table data={tableDatafromApi} wallet={Boolean(wallet)} /> : <Dots />}
 
         </div>
       </div>

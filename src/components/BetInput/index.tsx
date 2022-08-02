@@ -2,7 +2,10 @@ import * as  React from 'react'
 import clsxm from '@/lib/clsxm';
 
 import NextImage from '@/components/NextImage';
-import SolanaIcon from '@/assests/images/solana_icon.png';
+import SolImage from "@/assests/images/solana_icon.png"
+import CrekImage from "@/assests/images/Creck_Icon_PNG.png"
+import DustImage from "@/assests/images/Dust_Icon.png"
+import { AppContext } from '@/context/AppContext';
 
 interface Props {
   label: string
@@ -13,6 +16,7 @@ interface Props {
 
 const BetInput: React.FC<Props> = ({ value, setValue, onChange, label }) => {
   const inputRef = React.useRef<any>();
+  const { cryptoCurrency } = React.useContext(AppContext)
 
   // Foucs on the input on page load
   React.useEffect(() => {
@@ -30,7 +34,7 @@ const BetInput: React.FC<Props> = ({ value, setValue, onChange, label }) => {
         <div className='col-span-1 flex items-center'>
           <NextImage
             useSkeleton
-            src={SolanaIcon}
+            src={cryptoCurrency === 'sol' ? SolImage : cryptoCurrency === 'dust' ? DustImage : cryptoCurrency === 'crek' ? CrekImage : SolImage}
             alt='Solana Icon'
             className='w-6'
             width='26'

@@ -3,6 +3,9 @@ import * as React from 'react';
 import Discord from '@/assests/icons/Discord';
 import Facebook from '@/assests/icons/Facebook';
 import Twitter from '@/assests/icons/Twitter';
+import NextImage from '@/components/NextImage';
+import Logo from '@/assests/icons/Logo';
+
 
 const twitterLink = process.env.NEXT_PUBLIC_TWITTER_URL
 const discordLink = process.env.NEXT_PUBLIC_DISCORD_URL
@@ -28,21 +31,21 @@ export default function Footer() {
 
   return (
     <footer className='footer '>
-      <div className='container mx-auto grid grid-cols-12 gap-5 md:gap-0'>
-        <div className='col-span-12 flex justify-center md:col-span-2 md:justify-start'>
-          <span className='logoText mb-2 flex cursor-pointer select-none text-5xl'>
-            CoinFlip
+      <div className='container mx-auto grid grid-cols-12 gap-5 lg:gap-0'>
+        <div className='col-span-12 flex justify-center lg:col-span-3 lg:justify-start'>
+          <span className='logoText flex select-none'>
+            <Logo className='py-1' width={250} height={55} />
           </span>
         </div>
-        <div className='col-span-12 flex justify-center md:col-span-4 md:justify-start'>
-          <span className='footerText text-[4vw] lg:text-base flex items-center'>
+        <div className='col-span-12 flex justify-center lg:col-span-4 lg:justify-start'>
+          <span className='footerText text-white text-[4vw] lg:text-xl flex items-center'>
             © 2022 coinflip.com | All Rights Reserved.
           </span>
         </div>
-        <div className='col-span-12 flex justify-center md:col-span-4 md:justify-start'>
-          <span className='footerText flex items-center'>1 SOL = ${solPrice}</span>
+        <div className='col-span-12 flex justify-center lg:col-span-3 lg:justify-start'>
+          <span className='footerText footerGradient flex items-center'>1 SOL = ${solPrice}</span>
         </div>
-        <div className='col-span-12 flex justify-center md:col-span-2 md:justify-start'>
+        <div className='col-span-12 flex justify-center lg:col-span-2 lg:justify-center'>
           <div className='social-icon-cn flex justify-evenly'>
             <a href={twitterLink} target="_blank" rel="noreferrer">
               <span>

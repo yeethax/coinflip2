@@ -21,6 +21,17 @@ import BulletPoint from '@/assests/images/bulletPoint.png';
 import CoinAnimation from '@/assests/animationVideo/giphy.gif';
 import { AppContext } from '@/context/AppContext'
 import { useRouter } from 'next/router';
+import BulletHeading from '@/components/BulletHeading';
+import image from "@/assests/images/7779214.jpg"
+import image2 from "@/assests/images/Eighties.png"
+import { chatData, leaderBoard } from '@/data';
+import Message from '@/components/Message';
+import SimpleBar from 'simplebar-react';
+import Clipboard from '@/assests/icons/Clipboard';
+import LeaderBoard from '@/components/LeaderBoard';
+import Dots from '@/components/Loader/Dots';
+import Select from '@/components/Select';
+
 
 //--------------------------------------------------------------------
 // Constants
@@ -78,6 +89,7 @@ export default function HomePage() {
     showBalance, setShowBalance,
     showModal, setShowModal,
     winner, setWinner,
+    cryptoCurrency,
     data, setData,
     playFlippingSound, stopFlippingSound,
     playWinSound, playLossSound,
@@ -104,6 +116,14 @@ export default function HomePage() {
 
   const [randomChoice, setRandomChoice] = React.useState<string | undefined>('');
 
+
+  const [messagesList, setMessagesList] = React.useState(chatData);
+  const [newMessage, setNewMessage] = React.useState('');
+
+  const inputRef = React.useRef<any>(null);
+
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
   //--------------------------------------------------------------------
   // Side Effects
   //--------------------------------------------------------------------
@@ -118,9 +138,58 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  React.useEffect(() => {
+
+    scrollMessagesToBottom();
+  }, [messagesList]);
+
   //--------------------------------------------------------------------
   // Callbacks
   //--------------------------------------------------------------------
+
+  const scrollMessagesToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+
+  const handleScroll = (e: any) => {
+    let element = e.target;
+    if (element.scrollTop === 0) {
+      //fetch messages
+      console.log("hi")
+    }
+  }
+
+  const handleOnChange = (e: any) => {
+    setNewMessage(e.target.value);
+  };
+
+  const handleOnSubmit = (e: any) => {
+    e.preventDefault();
+    const trimmedMessage = {
+      id: "1",
+      username: "Moe",
+      text: newMessage.trim(),
+      time: new Date().toUTCString()
+    };
+
+    setMessagesList((prev: any) => { return [...prev, trimmedMessage] })
+    setNewMessage('');
+    // if (db) {
+    //   // Add new message in Firestore
+    //   messagesRef.add({
+    //     text: trimmedMessage,
+    //     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    //     uid,
+    //     displayName,
+    //     photoURL,
+    //   });
+    //   // Clear input field
+    //   setNewMessage('');
+    //   // Scroll down to the bottom of the list
+    // }
+  };
 
   const handleAmountChange = (event: any) => {
     const value = event.target.value;
@@ -179,7 +248,7 @@ export default function HomePage() {
       let optsStr = 'confirmed';
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -218,7 +287,7 @@ export default function HomePage() {
   };
 
   return (
-    <Layout title='Home'>
+    <Layout title={partner}>
 
       <div className='container flex min-h-screen flex-col px-4 sm:px-6'>
         {/* ===================================== */}
@@ -315,7 +384,7 @@ export default function HomePage() {
               <div className='lg:hidden'>
                 <button
                   className={clsxm(
-                    'w-[16vw] m-auto mx-1 select-none rounded-full bg-primary-200 px-3 py-1 text-[7px] font-extrabold text-white md:py-3 lg:px-4 lg:py-2 lg:text-sm'
+                    'w-[16vw] m-auto mx-1 select-none rounded-full bg-primary-200 px-3 py-1 text-[2vw] font-extrabold text-white md:py-3 lg:px-4 lg:py-2 lg:text-sm'
                   )}
                 >
                   {choice === 'H'
@@ -337,6 +406,10 @@ export default function HomePage() {
               <p className='my-6 text-center text-lg font-extrabold text-white'>
                 Bet Settings
               </p>
+
+              <div className='mx-1 my-3 lg:mx-5'>
+                <Select />
+              </div>
 
               {/* ======= Muliplier Tabs ======== */}
               <div className='mx-1 lg:mx-5'>
@@ -375,6 +448,7 @@ export default function HomePage() {
               {/* ================================ */}
               {/* ======= Muliplier Input ======== */}
               {/* ================================ */}
+
               <BetInput
                 label='Bet Amount'
                 value={amount}
@@ -439,37 +513,120 @@ export default function HomePage() {
             {/* =============================== */}
             {/* ======= Coins Selection ======= */}
             {/* =============================== */}
+
             <Coins coin={choice} setCoin={setChoice} />
           </div>
         </div>
 
-        {/* ==================================== */}
-        {/* ==========All Bets Details========== */}
-        {/* ==================================== */}
+
+
+        {/* ========================================= */}
+        {/* ==========Chat and leaderboards========== */}
+        {/* ========================================= */}
+
+        {/* Hidden For Now Because Firebase is not functional yet */}
+
+        <div className='hidden my-10'>
+
+          <div className='grid grid-cols-12 gap-4'>
+            <div className='col-span-12 order-first lg:col-span-4'>
+              <BulletHeading title='Global Chat' />
+
+              {/* ======= Chat Section ========== */}
+
+              <div className='bg-primary-600 mt-3 pt-4 rounded-xl'>
+                <div className='flex flex-col h-full'>
+                  <div className='px-2 max-w-screen-lg h-full overflow-hidden flex-1 m-2'>
+                    <SimpleBar timeout={500} scrollableNodeProps={{ ref: scrollRef }} clickOnTrack={false} className={clsxm(wallet ? "max-h-[398px]" : "max-h-[485px]")}>
+                      {messagesList.map((user, i) =>
+                        <div key={i}>
+                          <Message image={user?.id === "1" ? image2 : image} message={user.text} username={user.username} time={user.time} user={user?.id === "1" ? true : false} />
+                        </div>
+                      )}
+                    </SimpleBar>
+                  </div>
+                  {wallet &&
+                    <div className='bg-primary-800 mt-2 rounded-b-xl p-3'>
+                      <form
+                        onSubmit={handleOnSubmit}
+                        className='bg-primary-700 h-14 rounded-xl px-4 pt-3 z-10 max-w-screen-lg mx-auto shadow-md'
+                      >
+                        <div className='grid grid-cols-12 justify-between'>
+                          {/* <div className='col-span-1 hidden md:block'><EmojiPicker value={newMessage} setValue={setNewMessage} /></div> */}
+                          <div className='col-span-10'>
+                            <input
+                              className='flex-1 border-none bg-primary-700 w-full text-white outline-none outline-0 focus:outline-none focus:outline-offset-0'
+                              ref={inputRef}
+                              type='text'
+                              value={newMessage}
+                              onChange={handleOnChange}
+                              placeholder='Type message '
+                            />
+                          </div>
+                          <div className='col-span-2 flex justify-end'>
+                            <span className='border-[#ffffff26] border-l-[1px] h-full mr-3'></span>
+                            <button
+                              type='submit'
+                              disabled={!newMessage}
+                              className='text-white cursor-pointer flex justify-center border-[rgba(255, 255, 255, 0.15)]'
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 rotate-45" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>}
+                </div>
+              </div>
+            </div>
+
+            {/* ======= Leader Board Section ======= */}
+
+            <div className='col-span-12 order-last lg:col-span-8'>
+              <BulletHeading title='Highest Wins' />
+
+              <div className='bg-primary-600 mt-3 pt-4 rounded-xl'>
+                <div className='flex justify-between items-center border-b-2 border-[#3e4e67] py-3 mx-8'>
+                  <p className='text-white text-lg flex items-center'>Leaderboard</p>
+                  <button className='flex items-center rounded-full bg-primary-800 py-1 md:py-2 px-2 md:px-3 font-extrabold text-white'>
+                    <div>
+                      <Clipboard className='m-0 h-4 w-4' />
+                    </div>
+                    <p className='text-[2vw] mx-1 md:text-xs'>
+                      View all
+                    </p>
+                  </button>
+                </div>
+
+                <ul className='p-1 mt-2 md:mt-1 mx-4 md:p-4 md:mx-8'>
+                  <SimpleBar timeout={500} clickOnTrack={false} className="max-h-[410px]">
+                    {leaderBoard.map((user, i) => <div key={i}><LeaderBoard id={i} name={user?.name} payout={user?.payout} /></div>)}
+                  </SimpleBar>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        {/* ========================================= */}
+        {/* ==========All Bets Detail Table========== */}
+        {/* ========================================= */}
 
         <div className='grid grid-cols-12' id="latestBets">
           {/* ======= Headings ======= */}
           <div className='col-span-2'>
-            <p className='flex w-max items-center justify-between rounded-full bg-primary-700 py-2 px-5 text-center font-extrabold text-white'>
-              Latest Bets
-              <span className='dot ml-3'></span>
-            </p>
+            <BulletHeading title='Latest Bets' />
           </div>
 
           {/* ===================== */}
           {/* ======= Table ======= */}
           {/* ===================== */}
-          {tableDatafromApi ? (<Table data={tableDatafromApi} wallet={Boolean(wallet)} />) : (
-            <div className='bouncing-loader mt-5 col-span-12 mb-40'>
 
-              {/* loadind Dots */}
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          )}
+          {tableDatafromApi ? <Table data={tableDatafromApi} wallet={Boolean(wallet)} /> : <Dots />}
 
         </div>
       </div>

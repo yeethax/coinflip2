@@ -47,6 +47,7 @@ interface IAppContext {
   showBalance: boolean; setShowBalance: React.Dispatch<React.SetStateAction<boolean>>;
   infoMOdal: boolean; setInfoMOdal: React.Dispatch<React.SetStateAction<boolean>>;
   openGiveAwayModal: boolean; setOpenGiveAwayModal: React.Dispatch<React.SetStateAction<boolean>>;
+  openProfileSetting: boolean; setOpenProfileSetting: React.Dispatch<React.SetStateAction<boolean>>;
   showModal: boolean; setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
   showNotification: boolean; setShowNotification: React.Dispatch<React.SetStateAction<boolean>>;
   flippingCoin: boolean; setFlippingCoin: React.Dispatch<React.SetStateAction<boolean>>;
@@ -59,6 +60,7 @@ interface IAppContext {
   loadingIndex: number | null; setLoadingIndex: React.Dispatch<React.SetStateAction<number | null>>;
   balance: number | null; setBalance: React.Dispatch<React.SetStateAction<number | null>>;
   infoMOdalMessage: string; setInfoMOdalMessage: React.Dispatch<React.SetStateAction<string>>
+  cryptoCurrency: 'sol' | 'crek' | 'dust'; setCryptoCurrency: React.Dispatch<React.SetStateAction<string>>
   modalMessage: string; setModalMessage: React.Dispatch<React.SetStateAction<string>>
   modalInfoMessage: string; setModalInfoMessage: React.Dispatch<React.SetStateAction<string>>
   playFlippingSound: PlayFunction; stopFlippingSound: (id?: string | undefined) => void
@@ -120,8 +122,10 @@ export const AppProvider = ({ children }: Prop) => {
   const [winner, setWinner] = React.useState<boolean>(false);
   const [showModal, setShowModal] = React.useState<boolean>(false);
   const [openGiveAwayModal, setOpenGiveAwayModal] = React.useState<boolean>(false);
+  const [openProfileSetting, setOpenProfileSetting] = React.useState<boolean>(false);
   const [modalMessage, setModalMessage] = React.useState<string>('');
   const [modalInfoMessage, setModalInfoMessage] = React.useState<string>('');
+  const [cryptoCurrency, setCryptoCurrency] = React.useState<string>('sol');
 
   //--------------------------------------------------------------------
   // Sound States
@@ -435,6 +439,7 @@ export const AppProvider = ({ children }: Prop) => {
         loading, setLoading,
         showNotification, setShowNotification,
         openGiveAwayModal, setOpenGiveAwayModal,
+        openProfileSetting, setOpenProfileSetting,
         infoMOdalMessage, setInfoMOdalMessage,
         notifications, setNotifications,
         infoMOdal, setInfoMOdal,
@@ -443,6 +448,7 @@ export const AppProvider = ({ children }: Prop) => {
         showModal, setShowModal,
         modalMessage, setModalMessage,
         modalInfoMessage, setModalInfoMessage,
+        cryptoCurrency, setCryptoCurrency,
         loadingIndex, setLoadingIndex,
         playFlippingSound, stopFlippingSound,
         playWinSound, stopWinSound,

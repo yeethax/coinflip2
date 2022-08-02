@@ -3,6 +3,12 @@
 @tailwind utilities;
 
 @font-face {
+  font-family: 'Gore-Regular';
+  src: url('../assests/font/Gore-Regular.otf');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
   font-family: 'SignPainter-HouseScript';
   src: url('../assests/font/SignPainter-HouseScript-Regular.ttf');
   font-weight: 400;
@@ -154,6 +160,15 @@ span {
   .custom-linear-bg {
     background: linear-gradient(59deg, #ec9a01 47%, #edc800 68%);
   }
+  .custom-linear-bg-100 {
+    background: rgb(255, 236, 94);
+    background: linear-gradient(
+      289deg,
+      rgba(255, 236, 94, 1) 0%,
+      rgba(255, 109, 246, 1) 37%,
+      rgba(55, 252, 237, 1) 100%
+    );
+  }
 
   /* #region  /**=========== Typography =========== */
   .h0 {
@@ -224,6 +239,10 @@ span {
   .animated-underline:focus-visible {
     background-size: 0 2px, 100% 2px;
   }
+}
+
+#ProflieAvatar {
+  border: 2px solid white !important;
 }
 
 .logoText {
@@ -306,17 +325,23 @@ span {
   padding: 33px 40px 32px 43.5px;
   background-color: #283345;
 }
+
+.footerGradient {
+  background: -webkit-linear-gradient(79deg, #b056ff 21%, #1ceec7 78%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .footerText {
   opacity: 0.68;
   font-family: 'Montserrat';
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 500;
   font-stretch: normal;
   font-style: normal;
   line-height: normal;
   letter-spacing: -0.53px;
   text-align: center;
-  color: #fff;
 }
 .social-icon-cn {
   max-width: 218px;
