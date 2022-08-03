@@ -51,10 +51,10 @@ const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confir
 const deployer = new web3.PublicKey(process.env.NEXT_PUBLIC_DEPLOYER!);
 const partner = 'HOUSE';
 const maxBetAmount = process.env.NEXT_PUBLIC_MAX_BET;
-const SplTokens = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
-const GameVaultSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
-const GameVaultSplTokensATok = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK! };
-const GameAccountSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK! };
+const SplTokens: any = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
+const GameVaultSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
+const GameVaultSplTokensATok: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK! };
+const GameAccountSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK! };
 
 //--------------------------------------------------------------------
 // Helper Function
