@@ -50,13 +50,14 @@ const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000'
 const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
 const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!);
 const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed");
-const gameAccount = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_ACCOUNT!);
-const gameVault = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_VAULT!);
 const deployer = new web3.PublicKey(process.env.NEXT_PUBLIC_DEPLOYER!);
 const partner = 'HOUSE';
 const maxBetAmount = process.env.NEXT_PUBLIC_MAX_BET;
 const SplTokens = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
 const GameVaultSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
+const GameVaultSplTokensATok = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK! };
+const GameAccountSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK! };
+
 //--------------------------------------------------------------------
 // Helper Function
 //--------------------------------------------------------------------
@@ -108,12 +109,10 @@ export default function HomePage() {
   // Local States
   //--------------------------------------------------------------------
 
-  /// These values should be initialised  when the user has connected his wallet and choosen either DUST or CREK and everytime he switches his choice between those two
+  /// This value should be initialised  when the user has connected his wallet and choosen either DUST or CREK and everytime he switches his choice between those two
   /// initialisation is playerATokStr =  await findAssociatedTokenAddress(wallet.publicKey,new web3.PublicKey(SplTokens[currency])) where currency is either "DUST" or "CREK"
-  /// initialisation is gameVaultATokStr =  await findAssociatedTokenAddress(new web3.PublicKey(GameVaultSplTokens[currency]),,new web3.PublicKey(SplTokens[currency])) where currency is either "DUST" or "CREK"
-
   const [playerATokStr, setplayerATokStr] = React.useState<string>(''); //value
-  const [gameVaultATokStr, setgameVaultATokStr] = React.useState<string>(''); //value
+
 
   const [multiplier, setMultipler] = React.useState<number>(2.5);
   const [error, setError] = React.useState<boolean>(false);
@@ -229,6 +228,8 @@ export default function HomePage() {
       const gameId = web3.Keypair.generate();
       let multiplierMap: any = { 2.5: 40, 2: 50, 1.66: 60 };
       let odds = multiplierMap[multiplier];
+      const gameAccount = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_ACCOUNT!);
+      const gameVault = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_VAULT!);
       var txBet = await program.methods
         .makeBet(
           new BN(odds),
@@ -255,7 +256,7 @@ export default function HomePage() {
       let currency = "SOL";
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr, gameVaultATokStr }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -294,6 +295,9 @@ export default function HomePage() {
       let multiplierMap: any = { 2.5: 40, 2: 50, 1.66: 60 };
       let odds = multiplierMap[multiplier];
       let mint = new web3.PublicKey(SplTokens[currency]);
+      const gameVault = new web3.PublicKey(GameVaultSplTokens[currency]);
+      const gameVaultATok = new web3.PublicKey(GameVaultSplTokensATok[currency]);
+      const gameAccount = new web3.PublicKey(GameAccountSplTokens[currency]);
       var txBet = await program.methods
         .makeBetSpl(
           new BN(odds),
@@ -311,7 +315,7 @@ export default function HomePage() {
           tokenProgram: TOKEN_PROGRAM_ID,
           mint: mint,
           gamblerAtokenacc: new web3.PublicKey(playerATokStr),
-          gameVaultAtokenacc: new web3.PublicKey(gameVaultATokStr)
+          gameVaultAtokenacc: gameVaultATok
         })
         .signers([gameId])
         .rpc();
@@ -324,7 +328,7 @@ export default function HomePage() {
 
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency, playerATokStr, gameVaultATokStr }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency, playerATokStr }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
