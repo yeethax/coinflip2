@@ -419,14 +419,10 @@ export const AppProvider = ({ children }: Prop) => {
       let gameIdStr = gameId;
       let optsStr = 'confirmed';
       let mint = new web3.PublicKey(SplTokens[currency]);
-      let playerATokenacc = await findAssociatedTokenAddress(wallet?.publicKey, mint);
+      let playerATokStr = await findAssociatedTokenAddress(wallet?.publicKey, mint);
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-<<<<<<< HEAD
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokenacc }),
-=======
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr: playerATokenacc, gameVaultATokenacc }),
->>>>>>> fa6fd2a4682cb9d5afb15b803d4fe126b54d723d
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
