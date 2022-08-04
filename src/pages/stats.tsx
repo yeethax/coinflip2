@@ -52,7 +52,7 @@ export default function Stats() {
   const fetchAllSettledGamesNoFormatting = async () => {
     const provider2 = new AnchorProvider(connection, Keypair.generate(), opts);
     const program2 = new Program(idl, programId, provider2);
-    let result = await program2.account.gameId.all([
+    let result = await program2.account?.gameId?.all([
       {
         memcmp: {
           offset:

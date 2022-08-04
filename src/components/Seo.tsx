@@ -4,8 +4,8 @@ import { useRouter } from 'next/router';
 import { openGraph } from '@/lib/helper';
 
 const defaultMeta = {
-  title: 'Coin Flip - 2.5X Your Solana',
-  siteName: 'Coin Flip',
+  title: 'Just Coin Flip - 2.5X Your Solana',
+  siteName: 'Just Coin Flip',
   description: 'Play now for the chance to 2.5X your $SOL on a single coin flip.',
   url: 'https://coinflip-gold.vercel.app',
   type: 'website',

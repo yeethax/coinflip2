@@ -9,6 +9,20 @@ import RandomCoinImage from '@/assests/images/randomCoin.png';
 import TailCoinImage from '@/assests/images/tailsCoin.png'
 import HeadCoinImage from '@/assests/images/headsCoin.png'
 
+import RandomDuskImage from '@/assests/images/Dust_Random_Coin.png';
+import TailDuskImage from '@/assests/images/Dust_Tails_Coin.png'
+import HeadDuskImage from '@/assests/images/Dust_Heads_Coin.png'
+
+import RandomCrekImage from '@/assests/images/CRECK_Random_Coin.png';
+import TailCrekImage from '@/assests/images/CRECK_Tails_Coin.png'
+import HeadCrekImage from '@/assests/images/CRECK_Heads_Coin.png'
+
+import RandomForgeImage from '@/assests/images/Forge_Random_Coin.png';
+import TailForgeImage from '@/assests/images/Forge_Tails_Coin.png'
+import HeadForgeImage from '@/assests/images/Forge_Heads_Coin.png'
+
+import { AppContext } from '@/context/AppContext';
+
 interface Props {
   coin: string
   setCoin: React.Dispatch<React.SetStateAction<string>>
@@ -17,6 +31,7 @@ interface Props {
 const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
   const [click, { stop: stopClick }] = useSound(Click)
+  const { cryptoCurrency } = React.useContext(AppContext)
   // const [sliderValue, setSliderValue] = React.useState(50)
 
   // const handleSliderChange = (e: any) => {
@@ -63,7 +78,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
           <NextImage
             useSkeleton
-            src={HeadCoinImage}
+            src={cryptoCurrency === 'SOL' ? HeadCoinImage : cryptoCurrency === 'DUST' ? HeadDuskImage : cryptoCurrency === 'CREK' ? HeadCrekImage : cryptoCurrency === 'FORGE' ? HeadForgeImage : HeadCoinImage}
             alt='Heads coin'
             className={clsxm(
               'm-auto cursor-pointer select-none',
@@ -73,6 +88,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
             )}
             width='100'
             height='100'
+            priority
           />
 
           <button
@@ -80,7 +96,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
               'm-auto select-none px-6 text-xs font-extrabold lg:block lg:rounded-full lg:py-2',
               coin === 'H'
                 ? 'hidden text-white lg:bg-primary-200'
-                : 'text-primary-100 lg:bg-[#566073]'
+                : 'mt-2 text-primary-100 lg:bg-[#566073]'
             )}
           >
             Heads
@@ -109,7 +125,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
           <NextImage
             useSkeleton
-            src={RandomCoinImage}
+            src={cryptoCurrency === 'SOL' ? RandomCoinImage : cryptoCurrency === 'DUST' ? RandomDuskImage : cryptoCurrency === 'CREK' ? RandomCrekImage : cryptoCurrency === 'FORGE' ? RandomForgeImage : RandomCoinImage}
             alt='Random coin'
             className={clsxm(
               'm-auto cursor-pointer select-none',
@@ -119,6 +135,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
             )}
             width='100'
             height='100'
+            priority
           />
 
           <button
@@ -126,7 +143,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
               'm-auto select-none px-6 text-xs font-extrabold lg:block lg:rounded-full lg:py-2',
               coin === 'R'
                 ? 'hidden text-white lg:block lg:bg-primary-200'
-                : 'text-primary-100 lg:bg-[#566073]'
+                : 'mt-2 text-primary-100 lg:bg-[#566073]'
             )}
           >
             Random
@@ -153,7 +170,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
           <NextImage
             useSkeleton
-            src={TailCoinImage}
+            src={cryptoCurrency === 'SOL' ? TailCoinImage : cryptoCurrency === 'DUST' ? TailDuskImage : cryptoCurrency === 'CREK' ? TailCrekImage : cryptoCurrency === 'FORGE' ? TailForgeImage : TailCoinImage}
             alt='Tails coin'
             className={clsxm(
               'm-auto cursor-pointer select-none',
@@ -163,6 +180,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
             )}
             width='100'
             height='100'
+            priority
           />
 
 
@@ -171,7 +189,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
               'm-auto select-none px-6 lg:py-2 text-xs font-extrabold lg:block lg:rounded-full',
               coin === 'T'
                 ? 'hidden text-white lg:bg-primary-200'
-                : 'text-primary-100 lg:bg-[#566073]'
+                : 'mt-2 text-primary-100 lg:bg-[#566073]'
             )}
           >
             Tails

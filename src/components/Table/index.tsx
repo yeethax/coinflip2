@@ -2,10 +2,14 @@ import React from 'react'
 import clsxm from '@/lib/clsxm';
 import Clipboard from '@/assests/icons/Clipboard';
 import NextImage from '@/components/NextImage';
-import SolanaIcon from '../../assests/images/solana_icon.png';
+import SolImage from "@/assests/images/solana_icon.png"
+import CrekImage from "@/assests/images/Creck_Icon_PNG.png"
+import DustImage from "@/assests/images/Dust_Icon.png"
+import ForgeImage from "@/assests/images/Forge_Symbol.png"
 import moment from 'moment';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import TableSkeleton from '@/components/Table/TableSkeleton';
+import { AppContext } from '@/context/AppContext';
 
 interface Props {
   data: Player[]
@@ -31,6 +35,7 @@ type Player = {
 };
 
 const Table: React.FC<Props> = ({ data, wallet }: Props) => {
+  const { cryptoCurrency } = React.useContext(AppContext)
   return (
     <div className='col-span-12 mb-40 mt-5'>
       <div className='lgpx-4 relative overflow-x-auto rounded-lg bg-primary-700 py-3 px-2 shadow-md lg:py-5'>
@@ -122,12 +127,12 @@ const Table: React.FC<Props> = ({ data, wallet }: Props) => {
                         <span className='text-[3vw] md:text-xs lg:text-sm'>
                           {player.account.choice === player.account.outcome ? "+" : '-'} {
                             player.account.choice === player.account.outcome ? winAmount.toString().slice(0, winAmount.toString().indexOf('.') + 5) :
-                              lossAmount.toString().slice(0, lossAmount.toString().indexOf('.') + 5)} SOL
+                              lossAmount.toString().slice(0, lossAmount.toString().indexOf('.') + 5)} <span className='uppercase'>{cryptoCurrency}</span>
                         </span>
                         &nbsp;&nbsp;
                         <NextImage
                           useSkeleton
-                          src={SolanaIcon}
+                          src={cryptoCurrency === 'SOL' ? SolImage : cryptoCurrency === 'DUST' ? DustImage : cryptoCurrency === 'CREK' ? CrekImage : cryptoCurrency === "FORGE" ? ForgeImage : SolImage}
                           alt='Solana Icon'
                           className='w-6'
                           width='26'
