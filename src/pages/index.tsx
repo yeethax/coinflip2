@@ -56,13 +56,6 @@ const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!)
 const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed");
 const deployer = new web3.PublicKey(process.env.NEXT_PUBLIC_DEPLOYER!);
 const partner = 'HOUSE';
-<<<<<<< HEAD
-const maxBetAmount = process.env.NEXT_PUBLIC_MAX_BET;
-const SplTokens: any = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
-const GameVaultSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
-const GameVaultSplTokensATok: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK! };
-const GameAccountSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK! };
-=======
 const maxBetAmountSol = process.env.NEXT_PUBLIC_MAX_BET;
 const maxBetAmountDust = process.env.NEXT_PUBLIC_MAX_BET_DUST;
 const maxBetAmountCrek = process.env.NEXT_PUBLIC_MAX_BET_CREK;
@@ -74,7 +67,6 @@ const GameVaultSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUS
 const GameVaultSplTokensATok: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_FORGE! };
 const GameAccountSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_ACCOUNT_FORGE! };
 
->>>>>>> fa6fd2a4682cb9d5afb15b803d4fe126b54d723d
 
 //--------------------------------------------------------------------
 // Helper Function
