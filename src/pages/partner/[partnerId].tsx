@@ -380,7 +380,7 @@ export default function HomePage() {
 
 
   return (
-    <Layout title={partner}>
+    <Layout title="Partner">
 
       <div className='container flex min-h-screen flex-col px-4 sm:px-6'>
         {/* ===================================== */}
