@@ -2,6 +2,7 @@
 import * as React from 'react';
 import clsxm from '@/lib/clsxm';
 
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { AnchorProvider, BN, Program, web3 } from '@project-serum/anchor';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -14,7 +15,10 @@ import Loader from '@/components/Loader';
 import { Modal } from '@/components/Modal';
 import { InfoModal } from '@/components/Modal/InfoModal';
 
-import SolanaIcon from '@/assests/images/solana_icon.png';
+import SolImage from "@/assests/images/solana_icon.png"
+import CrekImage from "@/assests/images/Creck_Icon_PNG.png"
+import DustImage from "@/assests/images/Dust_Icon.png"
+import ForgeImage from "@/assests/images/Forge_Symbol.png"
 import Coins from '@/components/CoinSlider';
 import BetInput from '@/components/BetInput';
 import BulletPoint from '@/assests/images/bulletPoint.png';
@@ -38,6 +42,7 @@ import Select from '@/components/Select';
 //--------------------------------------------------------------------
 
 const idl = require('@/idl/coinflip2');
+const idlSpl = require('@/idl/coinflip2Spl');
 
 // ===> New Opts <=== //
 const opts: ConfirmOptions = {
@@ -45,13 +50,23 @@ const opts: ConfirmOptions = {
   commitment: 'confirmed', // "finalized is better"
 };
 
-const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
+// const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
+const Api_Url = 'https://justcoinflip-test.herokuapp.com'
 const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
+const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!);
 const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed");
-const gameAccount = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_ACCOUNT!);
-const gameVault = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_VAULT!);
 const deployer = new web3.PublicKey(process.env.NEXT_PUBLIC_DEPLOYER!);
-const maxBetAmount = process.env.NEXT_PUBLIC_MAX_BET;
+const partner = 'HOUSE';
+const maxBetAmountSol = process.env.NEXT_PUBLIC_MAX_BET;
+const maxBetAmountDust = process.env.NEXT_PUBLIC_MAX_BET_DUST;
+const maxBetAmountCrek = process.env.NEXT_PUBLIC_MAX_BET_CREK;
+const maxBetAmountForge = process.env.NEXT_PUBLIC_MAX_BET_FORGE;
+const minBetAmountSol = process.env.NEXT_PUBLIC_MIN_BET
+const minBetAmountSpl = process.env.NEXT_PUBLIC_MIN_BET_SPL
+const SplTokens: any = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK!, "FORGE": process.env.NEXT_PUBLIC_FORGE! };
+const GameVaultSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_VAULT_FORGE! };
+const GameVaultSplTokensATok: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_FORGE! };
+const GameAccountSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_ACCOUNT_FORGE! };
 
 //--------------------------------------------------------------------
 // Helper Function
@@ -78,32 +93,20 @@ export default function HomePage() {
   //--------------------------------------------------------------------
 
   const {
-    fetchFailedGamesByUser, setShowNotification,
-    loading, setLoading,
-    balance, setBalance,
-    flippingCoin, setFlippingCoin,
+    fetchFailedGamesByUser, loading, balance, flippingCoin, setFlippingCoin,
     infoMOdal, setInfoMOdal,
     infoMOdalMessage, setInfoMOdalMessage,
-    modalMessage, setModalMessage,
-    modalInfoMessage, setModalInfoMessage,
-    showBalance, setShowBalance,
-    showModal, setShowModal,
-    winner, setWinner,
-    cryptoCurrency,
-    data, setData,
-    playFlippingSound, stopFlippingSound,
-    playWinSound, playLossSound,
-    getBalance, sendToDiscord, fetchAllSettledGames,
-    closeBetModals, closeLoader, tableDatafromApi,
-    winImageURL, lossImageURL, notifyRef
-  } = React.useContext(AppContext)
+    modalMessage, modalInfoMessage, showBalance, showModal, setShowModal,
+    winner, data, setData,
+    cryptoCurrency, getBalanceSpl,
+    playFlippingSound, playerATokStr, closeLoader, tableDatafromApi } = React.useContext(AppContext)
 
   //--------------------------------------------------------------------
   // Max - Min Bet Amount
   //--------------------------------------------------------------------
 
-  const min = 0;
-  const max = Number(maxBetAmount);
+  const min = cryptoCurrency === "SOL" ? Number(minBetAmountSol) : Number(minBetAmountSpl);
+  const max = cryptoCurrency === "SOL" ? Number(maxBetAmountSol) : cryptoCurrency === "DUST" ? Number(maxBetAmountDust) : cryptoCurrency === "CREK" ? Number(maxBetAmountCrek) : cryptoCurrency === "FORGE" ? Number(maxBetAmountForge) : Number(maxBetAmountSol);
 
   //--------------------------------------------------------------------
   // Local States
@@ -223,6 +226,8 @@ export default function HomePage() {
       const gameId = web3.Keypair.generate();
       let multiplierMap: any = { 2.5: 40, 2: 50, 1.66: 60 };
       let odds = multiplierMap[multiplier];
+      const gameAccount = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_ACCOUNT!);
+      const gameVault = new web3.PublicKey(process.env.NEXT_PUBLIC_GAME_VAULT!);
       var txBet = await program.methods
         .makeBet(
           new BN(odds),
@@ -246,9 +251,84 @@ export default function HomePage() {
       let gameIdStr = gameId.publicKey.toBase58();
       let gambler = provider.wallet.publicKey.toBase58() //TODO remove this string
       let optsStr = 'confirmed';
+      let currency = "SOL";
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, cryptoCurrency }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency: cryptoCurrency, playerATokStr }),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+
+      const resultData = await response.json();
+      setData(resultData);
+    } catch (error) {
+      setFlippingCoin(false);
+      setTimeout(closeLoader, 500);
+      setTimeout(fetchFailedGamesByUser, 5000);
+      console.log(error);
+    }
+  };
+
+  // for custom token
+  const makeBetSpl = async (randomValue?: string) => {
+    // currency is either "DUST" or "CREK" for now
+    //--------------------------------------------------------------------
+    // BEGINNING OF MODIFICATION sending the bet on blockchain
+    //--------------------------------------------------------------------
+    try {
+      console.log('In makeBetSpl');
+      if (!wallet) {
+        return;
+      }
+      console.log("makeBetSpl")
+      setFlippingCoin(true);
+      playFlippingSound()
+      const currency = cryptoCurrency
+      const selectedChoice = randomValue ?? choice;
+      const provider = new AnchorProvider(connection, wallet, opts);
+      const program = new Program(idlSpl, programIdSpl, provider);
+      //program and provider should be the ones initialised with initialisedEnv using the user wallet
+      const gameId = web3.Keypair.generate();
+      let multiplierMap: any = { 2.5: 40, 2: 50, 1.66: 60 };
+      let odds = multiplierMap[multiplier];
+      let mint = new web3.PublicKey(SplTokens[currency]);
+      const gameVault = new web3.PublicKey(GameVaultSplTokens[currency]);
+      const gameVaultATok = new web3.PublicKey(GameVaultSplTokensATok[currency]);
+      const gameAccount = new web3.PublicKey(GameAccountSplTokens[currency]);
+      var txBet = await program.methods
+        .makeBetSpl(
+          new BN(odds),
+          selectedChoice,
+          new BN(amount * LAMPORTS_PER_SOL),
+          partner
+        )
+        .accounts({
+          gambler: provider.wallet.publicKey,
+          gameAccount: gameAccount,
+          gameVault: gameVault,
+          gameId: gameId.publicKey,
+          manager: deployer,
+          systemProgram: web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          mint: mint,
+          gamblerAtokenacc: new web3.PublicKey(playerATokStr),
+          gameVaultAtokenacc: gameVaultATok
+        })
+        .signers([gameId])
+        .rpc();
+
+      console.log('tx hsould be sent');
+
+      let gameIdStr = gameId.publicKey.toBase58();
+      let gambler = provider.wallet.publicKey.toBase58() //TODO remove this string
+      let optsStr = 'confirmed';
+
+      const response = await fetch(`${Api_Url}/makeBet`, {
+        method: 'POST',
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency: cryptoCurrency, playerATokStr }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -268,23 +348,36 @@ export default function HomePage() {
 
   const flipCoin = async () => {
     if (!(amount > max) && amount !== 0 && choice !== 'R') {
-      makeBet()
+      console.log({ cryptoCurrency })
+      if (cryptoCurrency === "SOL") {
+        makeBet();
+      } else {
+        console.log(choice)
+        makeBetSpl();
+      }
     }
     else if (amount > max) {
       setInfoMOdal(true);
-      setInfoMOdalMessage('Maximum Bet Amount = 1');
+      setInfoMOdalMessage(`Maximum Bet Amount = ${max}`);
     }
-    else if (amount <= min) {
+    else if (amount < min) {
       setInfoMOdal(true);
-      setInfoMOdalMessage('Enter Bet Amount');
+      setInfoMOdalMessage(`Enter Bet Amount more than ${min}`);
     }
     else if (choice === 'R') {
       // setting the random value in makebet function
       let randomCoinChoice = randomCoin();
       setRandomChoice(randomCoinChoice);
-      makeBet(randomCoinChoice);
+      console.log({ cryptoCurrency })
+      if (cryptoCurrency === "SOL") {
+        makeBet(randomCoinChoice);
+      } else {
+        console.log(randomCoinChoice)
+        makeBetSpl(randomCoinChoice);
+      }
     }
   };
+
 
   return (
     <Layout title={partner}>
@@ -346,7 +439,7 @@ export default function HomePage() {
           text={modalMessage}
           InfoText={modalInfoMessage}
           showTweet={data?.won}
-          tweetTitle={`Won ${data?.payout} $SOL on @justcoinflip 🎉 2.5X your Solana here: justcoinflip.xyz`}
+          tweetTitle={`Won ${data?.payout} ${cryptoCurrency} on @justcoinflip 🎉 2.5X your Solana here: justcoinflip.xyz`}
           tweetImage="pic.twitter.com/yJ4XWbDI3Q"
         />
 
@@ -371,14 +464,14 @@ export default function HomePage() {
                 <div className='flex w-max items-center rounded-full bg-primary-900 px-2 py-1 font-extrabold text-white lg:px-4 lg:py-2'>
                   <NextImage
                     useSkeleton
-                    src={SolanaIcon}
+                    src={cryptoCurrency === 'SOL' ? SolImage : cryptoCurrency === 'DUST' ? DustImage : cryptoCurrency === 'CREK' ? CrekImage : cryptoCurrency === "FORGE" ? ForgeImage : SolImage}
                     alt='Solana Icon'
                     className='w-5'
                     width='14'
                     height='14'
                   />
                   &nbsp;
-                  <span className='text-[2vw] lg:text-sm'>{balance?.toString().slice(0, balance?.toString().indexOf('.') + 5)} SOL</span>
+                  <span className='text-[2vw] lg:text-sm'>{balance?.toString().slice(0, balance?.toString().indexOf('.') + 5)} {cryptoCurrency}</span>
                 </div>
               )}
               <div className='lg:hidden'>
@@ -457,10 +550,10 @@ export default function HomePage() {
               />
 
               {error && amount > max && (
-                <p className='mx-5 text-red-600'>Maximum Bet Limit = 1</p>
+                <p className='mx-5 text-red-600'>Maximum Bet Limit = {max}</p>
               )}
-              {error && amount <= min && (
-                <p className='mx-5 text-red-600'>Enter Bet Amount</p>
+              {error && amount < min && (
+                <p className='mx-5 text-red-600'>Minimum Bet Limit = {min}</p>
               )}
 
               {/* ===================================== */}
@@ -479,7 +572,7 @@ export default function HomePage() {
                       )}
                       type='button'
                       onClick={flipCoin}
-                      disabled={amount <= min || amount > max}
+                      disabled={amount < min || amount > max}
                     >
                       {!loading && <span>Flip Coin</span>}
                       {/* {loading && <span className='text-lg'>Flipping coin for {choice === 'H' ? "Heads" : choice === "T" ? "Tails" : randomChoice === "H" ? "Heads" : randomChoice === "T" ? "Tails" : ""} {multiplier}x</span>} */}
@@ -503,7 +596,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* <button type='button' onClick={() => playFlippingSound()}>Play</button> */}
 
               <p className='m-2 text-center text-base font-medium text-primary-100'>
                 {multiplier === 2.5 ? `${multiplier}X odds (40%)` : multiplier === 2 ? `${multiplier}X odds (50%)` : multiplier === 1.66 ? `${multiplier}X odds (60%)` : null}
