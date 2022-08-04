@@ -43,7 +43,7 @@ export default function Header() {
   const router = useRouter()
 
   // AppContext
-  const { showNotification, notifyRef, handleClose, notifications, setShowNotification, openGiveAwayModal, openProfileSetting, setOpenProfileSetting, setOpenGiveAwayModal, fetchFailedGamesByUser, retryFailedBet, retryBet, setRetryBet, loadingIndex, setLoadingIndex } = React.useContext(AppContext);
+  const { showNotification, notifyRef, handleClose, notifications, cryptoCurrency, setShowNotification, openGiveAwayModal, openProfileSetting, setOpenProfileSetting, setOpenGiveAwayModal, fetchFailedGamesByUser, retryFailedBet, retryFailedBetSpl, setRetryBet, loadingIndex, setLoadingIndex } = React.useContext(AppContext);
 
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -73,11 +73,13 @@ export default function Header() {
 
   const handleRetryBet = async (notification: any, i: number) => {
     const { gameId, gambler, amount, odds } = notification
+    const currency = cryptoCurrency
     let multiplierMap: any = { 40: 2.5, 50: 2, 60: 1.66 };
     var multiplier = multiplierMap[odds];
     setLoadingIndex(i)
     setRetryBet(true)
-    await retryFailedBet(gameId, gambler, amount, multiplier, odds);
+    if (cryptoCurrency === "SOL") await retryFailedBet(gameId, gambler, amount, multiplier, odds);
+    else await retryFailedBetSpl(gameId, gambler, amount, multiplier, odds, currency);
   }
 
 
@@ -235,10 +237,10 @@ export default function Header() {
                                 <p className='ml-2 px-3 py-1 rounded-lg text-white hover:bg-gray-700 text-base font-bold flex items-center'>Enter Giveaway</p>
                               </div>
                             }
-                            <div className='flex py-3 items-center border-b-2 cursor-pointer border-[#3e4e67]'>
+                            {/* <div className='flex py-3 items-center border-b-2 cursor-pointer border-[#3e4e67]'>
                               <LinkIcon color='#6566bf' className='h-7 w-7' />
                               <p className='mt-1 ml-2 px-3 py-1 rounded-lg text-white hover:bg-gray-700 text-base font-bold flex items-center'>Affilate</p>
-                            </div>
+                            </div> */}
                             <Link href="/stats">
                               <div className='flex py-3 items-center border-b-2 cursor-pointer border-[#3e4e67]'>
                                 <ChartIcon color='#65bf9b' className='h-7 w-7' />
@@ -314,41 +316,6 @@ export default function Header() {
           <div className='hidden lg:block'>
             <div className='ml-10 flex items-center space-x-4'>
 
-              {/* {NftImage && NftHeading && NftSubHeading &&
-                <span className='flex items-center relative cursor-pointer' onClick={() => setOpenGiveAwayModal(true)}>
-                  <span className='absolute -left-3 cursor-pointer'>🎁</span>
-                  <span className='navLink cursor-pointer block rounded-md px-3 py-2 text-base font-medium text-white'>
-                    Giveaway
-                  </span>
-                </span>
-              }
-
-              <a
-                href="https://forms.gle/6FgSSYbkFQ1UEYfP9"
-                target="_blank" rel="noreferrer"
-              >
-                <span className='navLink cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-700'>
-                  Collab
-                </span>
-              </a>
-
-              <Link
-                href="/stats"
-              >
-                <span className='navLink cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-700'>
-                  Stats
-                </span>
-              </Link>
-
-              <a
-                href={GuideLink}
-                target="_blank" rel="noreferrer"
-              >
-                <span className='navLink cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-700'>
-                  Guide
-                </span>
-              </a> */}
-
               {/* Desktop screen  Notification */}
 
               {
@@ -390,7 +357,7 @@ export default function Header() {
                                           <WarningIcon className='h-8 w-8 fill-[#4ae288]' />
                                         </div>
                                         <div className='col-span-10 px-4'>
-                                          <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} $SOL</p>
+                                          <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} ${cryptoCurrency}</p>
                                           <p className='lg:text-sm semi-bold text-white text-[9px] leading-3 lg:leading-6'>Solana network failed transaction. Dont worry! Click retry to try again 👉</p>
                                         </div>
                                         <div className='col-span-1'>
@@ -489,10 +456,10 @@ export default function Header() {
                                   <p className='ml-2 px-3 py-1 rounded-lg text-white hover:bg-gray-700 text-base font-bold flex items-center'>Enter Giveaway</p>
                                 </div>
                               }
-                              <div className='flex py-3 items-center border-b-2 cursor-pointer border-[#3e4e67]'>
+                              {/* <div className='flex py-3 items-center border-b-2 cursor-pointer border-[#3e4e67]'>
                                 <LinkIcon color='#6566bf' className='h-7 w-7' />
                                 <p className='mt-1 ml-2 px-3 py-1 rounded-lg text-white hover:bg-gray-700 text-base font-bold flex items-center'>Affilate</p>
-                              </div>
+                              </div> */}
                               <Link href="/stats">
                                 <div className='flex py-3 items-center border-b-2 cursor-pointer border-[#3e4e67]'>
                                   <ChartIcon color='#65bf9b' className='h-7 w-7' />

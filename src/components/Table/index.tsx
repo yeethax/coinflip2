@@ -5,6 +5,7 @@ import NextImage from '@/components/NextImage';
 import SolImage from "@/assests/images/solana_icon.png"
 import CrekImage from "@/assests/images/Creck_Icon_PNG.png"
 import DustImage from "@/assests/images/Dust_Icon.png"
+import ForgeImage from "@/assests/images/Forge_Symbol.png"
 import moment from 'moment';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import TableSkeleton from '@/components/Table/TableSkeleton';
@@ -131,7 +132,7 @@ const Table: React.FC<Props> = ({ data, wallet }: Props) => {
                         &nbsp;&nbsp;
                         <NextImage
                           useSkeleton
-                          src={cryptoCurrency === 'sol' ? SolImage : cryptoCurrency === 'dust' ? DustImage : cryptoCurrency === 'crek' ? CrekImage : SolImage}
+                          src={cryptoCurrency === 'SOL' ? SolImage : cryptoCurrency === 'DUST' ? DustImage : cryptoCurrency === 'CREK' ? CrekImage : cryptoCurrency === "FORGE" ? ForgeImage : SolImage}
                           alt='Solana Icon'
                           className='w-6'
                           width='26'

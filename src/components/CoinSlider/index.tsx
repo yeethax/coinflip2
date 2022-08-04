@@ -16,6 +16,11 @@ import HeadDuskImage from '@/assests/images/Dust_Heads_Coin.png'
 import RandomCrekImage from '@/assests/images/CRECK_Random_Coin.png';
 import TailCrekImage from '@/assests/images/CRECK_Tails_Coin.png'
 import HeadCrekImage from '@/assests/images/CRECK_Heads_Coin.png'
+
+import RandomForgeImage from '@/assests/images/Forge_Random_Coin.png';
+import TailForgeImage from '@/assests/images/Forge_Tails_Coin.png'
+import HeadForgeImage from '@/assests/images/Forge_Heads_Coin.png'
+
 import { AppContext } from '@/context/AppContext';
 
 interface Props {
@@ -73,7 +78,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
           <NextImage
             useSkeleton
-            src={cryptoCurrency === 'sol' ? HeadCoinImage : cryptoCurrency === 'dust' ? HeadDuskImage : cryptoCurrency === 'crek' ? HeadCrekImage : HeadCoinImage}
+            src={cryptoCurrency === 'SOL' ? HeadCoinImage : cryptoCurrency === 'DUST' ? HeadDuskImage : cryptoCurrency === 'CREK' ? HeadCrekImage : cryptoCurrency === 'FORGE' ? HeadForgeImage : HeadCoinImage}
             alt='Heads coin'
             className={clsxm(
               'm-auto cursor-pointer select-none',
@@ -120,7 +125,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
           <NextImage
             useSkeleton
-            src={cryptoCurrency === 'sol' ? RandomCoinImage : cryptoCurrency === 'dust' ? RandomDuskImage : cryptoCurrency === 'crek' ? RandomCrekImage : RandomCoinImage}
+            src={cryptoCurrency === 'SOL' ? RandomCoinImage : cryptoCurrency === 'DUST' ? RandomDuskImage : cryptoCurrency === 'CREK' ? RandomCrekImage : cryptoCurrency === 'FORGE' ? RandomForgeImage : RandomCoinImage}
             alt='Random coin'
             className={clsxm(
               'm-auto cursor-pointer select-none',
@@ -165,7 +170,7 @@ const Coins: React.FC<Props> = ({ coin, setCoin }: Props) => {
 
           <NextImage
             useSkeleton
-            src={cryptoCurrency === 'sol' ? TailCoinImage : cryptoCurrency === 'dust' ? TailDuskImage : cryptoCurrency === 'crek' ? TailCrekImage : TailCoinImage}
+            src={cryptoCurrency === 'SOL' ? TailCoinImage : cryptoCurrency === 'DUST' ? TailDuskImage : cryptoCurrency === 'CREK' ? TailCrekImage : cryptoCurrency === 'FORGE' ? TailForgeImage : TailCoinImage}
             alt='Tails coin'
             className={clsxm(
               'm-auto cursor-pointer select-none',

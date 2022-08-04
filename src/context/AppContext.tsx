@@ -6,7 +6,7 @@ import useSound from "use-sound";
 import { AnchorProvider, Program, web3 } from "@project-serum/anchor";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { ConfirmOptions, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import FlipSound from "@/assests/sounds/flipSound.mp3"
 import WinSound from "@/assests/sounds/winSound.mp3"
@@ -60,21 +60,27 @@ interface IAppContext {
   notifications: any; setNotifications: React.Dispatch<React.SetStateAction<any>>;
   loadingIndex: number | null; setLoadingIndex: React.Dispatch<React.SetStateAction<number | null>>;
   balance: number | null; setBalance: React.Dispatch<React.SetStateAction<number | null>>;
+  playerATokStr: string; setplayerATokStr: React.Dispatch<React.SetStateAction<string>>
   infoMOdalMessage: string; setInfoMOdalMessage: React.Dispatch<React.SetStateAction<string>>
-  cryptoCurrency: 'sol' | 'crek' | 'dust'; setCryptoCurrency: React.Dispatch<React.SetStateAction<string>>
+  cryptoCurrency: string; setCryptoCurrency: React.Dispatch<React.SetStateAction<string>>
   modalMessage: string; setModalMessage: React.Dispatch<React.SetStateAction<string>>
   modalInfoMessage: string; setModalInfoMessage: React.Dispatch<React.SetStateAction<string>>
   playFlippingSound: PlayFunction; stopFlippingSound: (id?: string | undefined) => void
   playWinSound: PlayFunction; stopWinSound: (id?: string | undefined) => void
   playLossSound: PlayFunction; stopLossSound: (id?: string | undefined) => void
   getBalance: () => void;
+  getBalanceSpl: () => void;
+  getPlayerAToStr: (currency: string) => void;
   handleClose: () => void;
   closeBetModals: () => void;
   closeLoader: () => void;
   sendToDiscord: () => void;
   fetchAllSettledGames: () => void;
+  fetchAllSettledGamesSpl: (currency: string) => void;
+  fetchFailedGamesByUserSpl: (currency: string) => void
   fetchFailedGamesByUser: (user?: PublicKey) => void
   retryFailedBet: (gameId: string, gambler: string, amount: number, multiplier: number, odds: number) => void
+  retryFailedBetSpl: (gameId: string, gambler: string, amount: number, multiplier: number, odds: number, currency: string) => void
   winImageURL: string
   lossImageURL: string
   notifyRef: React.MutableRefObject<any>
@@ -87,15 +93,17 @@ const opts: ConfirmOptions = {
   commitment: 'confirmed', // "finalized is better"
 };
 
-const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
-//const Api_Url = 'https://justcoinflip.herokuapp.com'
+// const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
+const Api_Url = 'https://justcoinflip-test.herokuapp.com'
 const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
 const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!);
 
 const connection = new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed");
 
-const SplTokens = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK! };
-const GameVaultSplTokens = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK! };
+const SplTokens: any = { "DUST": process.env.NEXT_PUBLIC_DUST!, "CREK": process.env.NEXT_PUBLIC_CREK!, "FORGE": process.env.NEXT_PUBLIC_FORGE! };
+const GameVaultSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_VAULT_FORGE! };
+const GameVaultSplTokensATok: any = { "DUST": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_VAULT_ATOK_FORGE! };
+const GameAccountSplTokens: any = { "DUST": process.env.NEXT_PUBLIC_GAME_ACCOUNT_DUST!, "CREK": process.env.NEXT_PUBLIC_GAME_ACCOUNT_CREK!, "FORGE": process.env.NEXT_PUBLIC_GAME_ACCOUNT_FORGE! };
 
 
 export const AppProvider = ({ children }: Prop) => {
@@ -119,19 +127,20 @@ export const AppProvider = ({ children }: Prop) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [flippingCoin, setFlippingCoin] = React.useState<boolean>(false);
   const [dataDiscord, setDataDiscord] = React.useState<any>();
+  const [playerATokStr, setplayerATokStr] = React.useState<string>('');
 
   const [infoMOdal, setInfoMOdal] = React.useState<boolean>(false);
   const [infoMOdalMessage, setInfoMOdalMessage] = React.useState<string>('');
 
   const [retryBet, setRetryBet] = React.useState<boolean>(false);
-  const [loadingIndex, setLoadingIndex] = React.useState<number>(null);
+  const [loadingIndex, setLoadingIndex] = React.useState<number | null>(null);
   const [winner, setWinner] = React.useState<boolean>(false);
   const [showModal, setShowModal] = React.useState<boolean>(false);
   const [openGiveAwayModal, setOpenGiveAwayModal] = React.useState<boolean>(false);
   const [openProfileSetting, setOpenProfileSetting] = React.useState<boolean>(false);
   const [modalMessage, setModalMessage] = React.useState<string>('');
   const [modalInfoMessage, setModalInfoMessage] = React.useState<string>('');
-  const [cryptoCurrency, setCryptoCurrency] = React.useState<string>('sol');
+  const [cryptoCurrency, setCryptoCurrency] = React.useState<string>('SOL');
 
   //--------------------------------------------------------------------
   // Sound States
@@ -158,14 +167,15 @@ export const AppProvider = ({ children }: Prop) => {
     if (!wallet) {
       const walletButton = document.querySelector('.connectBtn') as HTMLElement | null;
       if (walletButton !== null) walletButton.innerText = 'Connect Wallet';
-      fetchAllSettledGames()
+      fetchGamesData()
     } else if (wallet) {
-      getBalance()
-      fetchAllSettledGames()
-      fetchFailedGamesByUser()
+      if (cryptoCurrency === "SOL") getBalance()
+      if (cryptoCurrency !== "SOL") getBalanceSpl(cryptoCurrency);
+      fetchGamesData()
+      fetchFailedGamesData()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet]);
+  }, [wallet, cryptoCurrency]);
 
   // Show Modal on Win | Loss
   React.useEffect(() => {
@@ -178,10 +188,11 @@ export const AppProvider = ({ children }: Prop) => {
       setModalInfoMessage("Your balance may take a few seconds to adjust on the blockchain")
       setTimeout(closeBetModals, 20000);
       sendToDiscord()
-      fetchAllSettledGames()
-      setTimeout(fetchFailedGamesByUser, 15000);
-      getBalance()
+      fetchGamesData()
+      setTimeout(fetchFailedGamesData, 15000);
       setShowNotification(false)
+      if (cryptoCurrency === "SOL") getBalance()
+      if (cryptoCurrency !== "SOL") getBalanceSpl(cryptoCurrency);
     } else if (data?.won === false) {
       playLossSound()
       setFlippingCoin(false);
@@ -191,10 +202,11 @@ export const AppProvider = ({ children }: Prop) => {
       setModalInfoMessage("Your balance may take a few seconds to adjust on the blockchain")
       setTimeout(closeBetModals, 5000);
       sendToDiscord()
-      fetchAllSettledGames()
-      setTimeout(fetchFailedGamesByUser, 3000);
-      getBalance()
+      fetchGamesData()
+      setTimeout(fetchFailedGamesData, 3000);
       setShowNotification(false)
+      if (cryptoCurrency === "SOL") getBalance()
+      if (cryptoCurrency !== "SOL") getBalanceSpl(cryptoCurrency);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -205,7 +217,7 @@ export const AppProvider = ({ children }: Prop) => {
       closeLoader()
       stopFlippingSound()
       setShowNotification(false)
-      setTimeout(fetchFailedGamesByUser, 15000);
+      setTimeout(fetchFailedGamesData, 15000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -214,7 +226,7 @@ export const AppProvider = ({ children }: Prop) => {
   React.useEffect(() => {
     if (data?.won === true || false) {
       setTimeout(getBalance, 10000);
-      setTimeout(fetchAllSettledGames, 5000);
+      setTimeout(fetchGamesData, 5000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.reslt]);
@@ -227,6 +239,13 @@ export const AppProvider = ({ children }: Prop) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications])
 
+  // changing the playerString Based on currency
+  React.useEffect(() => {
+    getPlayerAToStr(cryptoCurrency)
+    getBalanceSpl(cryptoCurrency)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet, cryptoCurrency]);
+
 
   // const notifyMe = () => { notifyRef?.current?.click(); setTriggerNotification(true) }
 
@@ -234,8 +253,32 @@ export const AppProvider = ({ children }: Prop) => {
   // Callbacks
   //--------------------------------------------------------------------
 
-  const fetchFailedGamesByUserSpl = async (currency) => {
-    if (!wallet) {
+  const findAssociatedTokenAddress = async (walletAddress: web3.PublicKey, tokenMintAddress: web3.PublicKey): Promise<string> => {
+    const ASSOCIATED_TOKEN_PROGRAM_ID = await new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+    let programAddress = await web3.PublicKey.findProgramAddress([walletAddress?.toBuffer(), TOKEN_PROGRAM_ID?.toBuffer(), tokenMintAddress?.toBuffer(),], ASSOCIATED_TOKEN_PROGRAM_ID)
+    programAddress = programAddress[0].toString()
+    return programAddress
+  }
+
+  const getPlayerAToStr = async (currency: string) => {
+    if (cryptoCurrency !== "SOL") {
+      const tokenAddress = await findAssociatedTokenAddress(wallet?.publicKey, new web3.PublicKey(SplTokens[currency]))
+      setplayerATokStr(tokenAddress)
+    }
+  }
+
+  const fetchGamesData = () => {
+    if (cryptoCurrency === "SOL") fetchAllSettledGames()
+    else fetchAllSettledGamesSpl(cryptoCurrency)
+  }
+
+  const fetchFailedGamesData = () => {
+    if (cryptoCurrency === "SOL") fetchFailedGamesByUser()
+    else fetchFailedGamesByUserSpl(cryptoCurrency)
+  }
+
+  const fetchFailedGamesByUserSpl = async (currency: string) => {
+    if (!wallet && currency === "SOL") {
       return;
     }
     const provider = new AnchorProvider(new web3.Connection(process.env.NEXT_PUBLIC_RPC_URL!, "confirmed"), wallet, opts);
@@ -259,9 +302,8 @@ export const AppProvider = ({ children }: Prop) => {
             + 4 + 1//string prefix and one character
             + 2 //2 bool
             + 16 //2 u64
-            + 4 + 5 // 5 characters for partner
           ,
-          bytes: mint?.toBase58(),
+          bytes: mint.toBase58(),
         }
       },
       {
@@ -288,8 +330,10 @@ export const AppProvider = ({ children }: Prop) => {
     })
 
     // return result
+    console.log({ result })
     setNotifications(result)
   }
+
   const fetchFailedGamesByUser = async () => {
     if (!wallet) {
       return;
@@ -330,22 +374,7 @@ export const AppProvider = ({ children }: Prop) => {
     // return result
     setNotifications(result)
   }
-  const findAssociatedTokenAddress = async (
-    walletAddress: web3.PublicKey,
-    tokenMintAddress: web3.PublicKey,
-  ): Promise<string> => {
-    const ASSOCIATED_TOKEN_PROGRAM_ID = new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
-    return (
-      await web3.PublicKey.findProgramAddress(
-        [
-          walletAddress.toBuffer(),
-          TOKEN_PROGRAM_ID.toBuffer(),
-          tokenMintAddress.toBuffer(),
-        ],
-        ASSOCIATED_TOKEN_PROGRAM_ID,
-      )
-    )[0].toString();
-  }
+
   const retryFailedBet = async (gameId: string, gambler: string, amount: number, multiplier: number, odds: number) => {
 
     try {
@@ -379,6 +408,7 @@ export const AppProvider = ({ children }: Prop) => {
       console.log(error);
     }
   };
+
   const retryFailedBetSpl = async (gameId: string, gambler: string, amount: number, multiplier: number, odds: number, currency: string) => {
 
     try {
@@ -393,7 +423,7 @@ export const AppProvider = ({ children }: Prop) => {
       let gameVaultATokenacc = await findAssociatedTokenAddress(new web3.PublicKey(GameVaultSplTokens[currency]), mint);
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokenacc, gameVaultATokenacc }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr: playerATokenacc, gameVaultATokenacc }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -423,7 +453,7 @@ export const AppProvider = ({ children }: Prop) => {
   const fetchAllSettledGames = async () => {
     const provider2 = new AnchorProvider(connection, Keypair.generate(), opts);
     const program2 = new Program(idl, programId, provider2);
-    let result = await program2.account.gameId.all([
+    let result = await program2.account?.gameId?.all([
       {
         memcmp: {
           offset:
@@ -468,11 +498,12 @@ export const AppProvider = ({ children }: Prop) => {
 
     setTableData(filterOutZeroBets);
   };
+
   const fetchAllSettledGamesSpl = async (currency: string) => {
     const provider2 = new AnchorProvider(connection, Keypair.generate(), opts);
     const program2 = new Program(idlSpl, programIdSpl, provider2);
     const mint = new web3.PublicKey(SplTokens[currency]);
-    let result = await program2.account.gameIdSpl.all([
+    let result = await program2.account?.gameIdSpl?.all([
       {
         memcmp: {
           offset:
@@ -496,11 +527,10 @@ export const AppProvider = ({ children }: Prop) => {
             + 4 + 1//string prefix and one character
             + 2 //2 bool
             + 16 //2 u64
-            + 4 + 5 // 5 characters for partner
           ,
-          bytes: mint?.toBase58(),
+          bytes: mint.toBase58(),
         }
-      },
+      }
     ]);
 
     // converting date
@@ -536,6 +566,23 @@ export const AppProvider = ({ children }: Prop) => {
     const balance = await connection.getBalance(wallet?.publicKey);
     setBalance(balance / LAMPORTS_PER_SOL);
     setShowBalance(true);
+  }
+
+  const getBalanceSpl = async (currency) => {
+    console.log(currency)
+    if (currency !== "SOL") {
+      const tokenAddress = await findAssociatedTokenAddress(wallet?.publicKey, new web3.PublicKey(SplTokens[currency]))
+      console.log("playerATokStr", tokenAddress)
+      if (tokenAddress !== '') {
+        const playerValue = await new PublicKey(tokenAddress);
+        console.log(playerValue)
+        let newbalance = await connection.getTokenAccountBalance(playerValue);
+        console.log({ balance })
+        newbalance = parseInt(newbalance.value.amount) / LAMPORTS_PER_SOL
+        setBalance(newbalance);
+        setShowBalance(true);
+      }
+    }
   }
 
   const closeBetModals = async () => {
@@ -626,16 +673,17 @@ export const AppProvider = ({ children }: Prop) => {
         modalInfoMessage, setModalInfoMessage,
         cryptoCurrency, setCryptoCurrency,
         loadingIndex, setLoadingIndex,
+        playerATokStr, setplayerATokStr,
         playFlippingSound, stopFlippingSound,
         playWinSound, stopWinSound,
         playLossSound, stopLossSound,
         handleClose,
-        fetchAllSettledGames,
-        fetchFailedGamesByUser,
-        retryFailedBet,
+        fetchAllSettledGames, fetchAllSettledGamesSpl,
+        fetchFailedGamesByUser, fetchFailedGamesByUserSpl,
+        retryFailedBet, retryFailedBetSpl, getPlayerAToStr,
         closeBetModals,
         closeLoader,
-        getBalance,
+        getBalance, getBalanceSpl,
         sendToDiscord,
         winImageURL,
         lossImageURL,

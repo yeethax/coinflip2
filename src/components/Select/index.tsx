@@ -8,23 +8,29 @@ import NextImage from '@/components/NextImage'
 import SolImage from "@/assests/images/solana_icon.png"
 import CrekImage from "@/assests/images/Creck_Icon_PNG.png"
 import DustImage from "@/assests/images/Dust_Icon.png"
+import ForgeImage from "@/assests/images/Forge_Symbol.png"
 import { AppContext } from '@/context/AppContext'
 
 const cryptos = [
   {
     id: 1,
-    name: 'sol',
+    name: 'SOL',
     avatar: SolImage,
   },
   {
     id: 2,
-    name: 'dust',
+    name: 'DUST',
     avatar: DustImage,
   },
   {
     id: 3,
-    name: 'crek',
+    name: 'CREK',
     avatar: CrekImage,
+  },
+  {
+    id: 3,
+    name: 'FORGE',
+    avatar: ForgeImage,
   },
 ]
 
