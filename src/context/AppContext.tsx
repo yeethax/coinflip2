@@ -56,9 +56,11 @@ interface IAppContext {
   winner: boolean; setWinner: React.Dispatch<React.SetStateAction<boolean>>;
   retryBet: boolean; setRetryBet: React.Dispatch<React.SetStateAction<boolean>>;
   data: any; setData: React.Dispatch<React.SetStateAction<any>>
+  tableDatafromApiSol: any; setTableDataSol: React.Dispatch<React.SetStateAction<any>>;
   tableDatafromApi: any; setTableData: React.Dispatch<React.SetStateAction<any>>;
   notifications: any; setNotifications: React.Dispatch<React.SetStateAction<any>>;
   loadingIndex: number | null; setLoadingIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  balanceSol: number | null; setBalanceSol: React.Dispatch<React.SetStateAction<number | null>>;
   balance: number | null; setBalance: React.Dispatch<React.SetStateAction<number | null>>;
   playerATokStr: string; setplayerATokStr: React.Dispatch<React.SetStateAction<string>>
   infoMOdalMessage: string; setInfoMOdalMessage: React.Dispatch<React.SetStateAction<string>>
@@ -121,9 +123,11 @@ export const AppProvider = ({ children }: Prop) => {
   const [showNotification, setShowNotification] = React.useState<boolean>(false);
   const [notifications, setNotifications] = React.useState<any>([])
 
+  const [balanceSol, setBalanceSol] = React.useState<number | null>(null);
   const [balance, setBalance] = React.useState<number | null>(null);
   const [showBalance, setShowBalance] = React.useState<boolean>(false);
   const [data, setData] = React.useState<any>();
+  const [tableDatafromApiSol, setTableDataSol] = React.useState<any>();
   const [tableDatafromApi, setTableData] = React.useState<any>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [flippingCoin, setFlippingCoin] = React.useState<boolean>(false);
@@ -170,8 +174,7 @@ export const AppProvider = ({ children }: Prop) => {
       if (walletButton !== null) walletButton.innerText = 'Connect Wallet';
       fetchGamesData()
     } else if (wallet) {
-      if (cryptoCurrency === "SOL") getBalance()
-      if (cryptoCurrency !== "SOL") getBalanceSpl(cryptoCurrency);
+      fetchBalance()
       fetchGamesData()
       fetchFailedGamesData()
     }
@@ -192,8 +195,7 @@ export const AppProvider = ({ children }: Prop) => {
       fetchGamesData()
       setTimeout(fetchFailedGamesData, 15000);
       setShowNotification(false)
-      if (cryptoCurrency === "SOL") getBalance()
-      if (cryptoCurrency !== "SOL") getBalanceSpl(cryptoCurrency);
+      fetchBalance()
     } else if (data?.won === false) {
       playLossSound()
       setFlippingCoin(false);
@@ -206,8 +208,7 @@ export const AppProvider = ({ children }: Prop) => {
       fetchGamesData()
       setTimeout(fetchFailedGamesData, 3000);
       setShowNotification(false)
-      if (cryptoCurrency === "SOL") getBalance()
-      if (cryptoCurrency !== "SOL") getBalanceSpl(cryptoCurrency);
+      fetchBalance()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -218,6 +219,8 @@ export const AppProvider = ({ children }: Prop) => {
       closeLoader()
       stopFlippingSound()
       setShowNotification(false)
+      setTimeout(fetchGamesData, 5000);
+      setTimeout(fetchBalance, 10000);
       setTimeout(fetchFailedGamesData, 15000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -226,8 +229,9 @@ export const AppProvider = ({ children }: Prop) => {
   // Fetch Balance after data result
   React.useEffect(() => {
     if (data?.won === true || false) {
-      setTimeout(getBalance, 10000);
+      setTimeout(fetchBalance, 5000);
       setTimeout(fetchGamesData, 5000);
+      setTimeout(fetchFailedGamesData, 5000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.reslt]);
@@ -270,9 +274,17 @@ export const AppProvider = ({ children }: Prop) => {
     }
   }
 
-  const fetchGamesData = () => {
-    if (cryptoCurrency === "SOL") fetchAllSettledGames()
-    else fetchAllSettledGamesSpl(cryptoCurrency)
+  const fetchBalance = () => {
+    if (cryptoCurrency === "SOL") getBalance()
+    else getBalanceSpl(cryptoCurrency)
+  }
+
+  console.log({ tableDatafromApiSol })
+  console.log({ tableDatafromApi })
+
+  const fetchGamesData = async () => {
+    if (cryptoCurrency === "SOL") { await fetchAllSettledGames(); console.log("Sol games") }
+    else await fetchAllSettledGamesSpl(cryptoCurrency)
   }
 
   const fetchFailedGamesData = () => {
@@ -401,13 +413,13 @@ export const AppProvider = ({ children }: Prop) => {
       setLoadingIndex(null)
       setData(resultData);
       setShowNotification(true)
-      setTimeout(fetchFailedGamesByUser, 2000);
-      setTimeout(fetchAllSettledGames, 2000);
+      setTimeout(fetchFailedGamesData, 2000);
+      setTimeout(fetchGamesData, 2000);
       setRetryBet(false)
     } catch (error) {
       setTimeout(closeLoader, 500);
-      setTimeout(fetchFailedGamesByUser, 2000);
-      setTimeout(fetchAllSettledGames, 2000);
+      setTimeout(fetchFailedGamesData, 2000);
+      setTimeout(fetchGamesData, 2000);
       console.log(error);
     }
   };
@@ -437,13 +449,13 @@ export const AppProvider = ({ children }: Prop) => {
       setLoadingIndex(null)
       setData(resultData);
       setShowNotification(true)
-      setTimeout(fetchFailedGamesByUser, 2000);
-      setTimeout(fetchAllSettledGames, 2000);
+      setTimeout(fetchFailedGamesData, 2000);
+      setTimeout(fetchGamesData, 2000);
       setRetryBet(false)
     } catch (error) {
       setTimeout(closeLoader, 500);
-      setTimeout(fetchFailedGamesByUser, 2000);
-      setTimeout(fetchAllSettledGames, 2000);
+      setTimeout(fetchFailedGamesData, 2000);
+      setTimeout(fetchGamesData, 2000);
       console.log(error);
     }
   };
@@ -498,7 +510,7 @@ export const AppProvider = ({ children }: Prop) => {
       }
     })
 
-    setTableData(filterOutZeroBets);
+    setTableDataSol(filterOutZeroBets);
   };
 
   const fetchAllSettledGamesSpl = async (currency: string) => {
@@ -566,7 +578,7 @@ export const AppProvider = ({ children }: Prop) => {
 
   const getBalance = async () => {
     const balance = await connection.getBalance(wallet?.publicKey);
-    setBalance(balance / LAMPORTS_PER_SOL);
+    setBalanceSol(balance / LAMPORTS_PER_SOL);
     setShowBalance(true);
   }
 
@@ -658,7 +670,9 @@ export const AppProvider = ({ children }: Prop) => {
       value={{
         data, setData,
         balance, setBalance,
+        balanceSol, setBalanceSol,
         flippingCoin, setFlippingCoin,
+        tableDatafromApiSol, setTableDataSol,
         tableDatafromApi, setTableData,
         showBalance, setShowBalance,
         loading, setLoading,

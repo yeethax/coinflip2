@@ -82,7 +82,7 @@ export default function Header() {
     else await retryFailedBetSpl(gameId, gambler, amount, multiplier, odds, currency);
   }
 
-
+  console.log({ cryptoCurrency })
 
   return (
     <nav className='navbar sticky top-0 z-20 mx-auto bg-gray-800'>

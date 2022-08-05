@@ -85,13 +85,13 @@ export default function HomePage() {
   //--------------------------------------------------------------------
 
   const {
-    fetchFailedGamesByUser, loading, balance, flippingCoin, setFlippingCoin,
+    fetchFailedGamesByUser, loading, balance, balanceSol, flippingCoin, setFlippingCoin,
     infoMOdal, setInfoMOdal,
     infoMOdalMessage, setInfoMOdalMessage,
     modalMessage, modalInfoMessage, showBalance, showModal, setShowModal,
     winner, data, setData,
     cryptoCurrency, getBalanceSpl,
-    playFlippingSound, playerATokStr, closeLoader, tableDatafromApi } = React.useContext(AppContext)
+    playFlippingSound, playerATokStr, closeLoader, tableDatafromApi, tableDatafromApiSol } = React.useContext(AppContext)
 
   //--------------------------------------------------------------------
   // Max - Min Bet Amount
@@ -467,7 +467,7 @@ export default function HomePage() {
                     height='14'
                   />
                   &nbsp;
-                  <span className='text-[2vw] lg:text-sm'>{balance?.toString().slice(0, balance?.toString().indexOf('.') + 5)} {cryptoCurrency}</span>
+                  <span className='text-[2vw] lg:text-sm'>{cryptoCurrency !== "SOL" ? balance?.toString().slice(0, balance?.toString().indexOf('.') + 5) : balanceSol?.toString().slice(0, balanceSol?.toString().indexOf('.') + 5)} {cryptoCurrency}</span>
                 </div>
               )}
               <div className='lg:hidden'>
@@ -714,7 +714,7 @@ export default function HomePage() {
           {/* ======= Table ======= */}
           {/* ===================== */}
 
-          {tableDatafromApi ? <Table data={tableDatafromApi} wallet={Boolean(wallet)} /> : <Dots />}
+          {tableDatafromApiSol || tableDatafromApi ? <Table data={cryptoCurrency !== "SOL" ? tableDatafromApi : tableDatafromApiSol} wallet={Boolean(wallet)} /> : <Dots />}
 
         </div>
       </div>
