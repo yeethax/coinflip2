@@ -241,8 +241,10 @@ export const AppProvider = ({ children }: Prop) => {
 
   // changing the playerString Based on currency
   React.useEffect(() => {
-    getPlayerAToStr(cryptoCurrency)
-    getBalanceSpl(cryptoCurrency)
+    if (wallet) {
+      getPlayerAToStr(cryptoCurrency)
+      getBalanceSpl(cryptoCurrency)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallet, cryptoCurrency]);
 
@@ -627,7 +629,7 @@ export const AppProvider = ({ children }: Prop) => {
           },
           "fields": [{
             "name": "Payout",
-            "value": `${payOut} SOL`,
+            "value": `${payOut} ${cryptoCurrency}`,
             "inline": true,
           }],
         }

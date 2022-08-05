@@ -43,7 +43,7 @@ export default function Header() {
   const router = useRouter()
 
   // AppContext
-  const { showNotification, notifyRef, handleClose, notifications, cryptoCurrency, setShowNotification, openGiveAwayModal, openProfileSetting, setOpenProfileSetting, setOpenGiveAwayModal, fetchFailedGamesByUser, retryFailedBet, retryFailedBetSpl, setRetryBet, loadingIndex, setLoadingIndex } = React.useContext(AppContext);
+  const { showNotification, notifyRef, handleClose, notifications, cryptoCurrency, setShowNotification, fetchFailedGamesByUserSpl, openGiveAwayModal, openProfileSetting, setOpenProfileSetting, setOpenGiveAwayModal, fetchFailedGamesByUser, retryFailedBet, retryFailedBetSpl, setRetryBet, loadingIndex, setLoadingIndex } = React.useContext(AppContext);
 
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -60,8 +60,8 @@ export default function Header() {
 
   React.useEffect(() => {
     if (wallet) {
-      fetchFailedGamesByUser()
-      setTimeout(fetchFailedGamesByUser, 30000)
+      if (cryptoCurrency === "SOL") fetchFailedGamesByUser()
+      else fetchFailedGamesByUserSpl(cryptoCurrency)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallet]);
@@ -138,7 +138,7 @@ export default function Header() {
                                         <WarningIcon className='h-8 w-8 fill-[#4ae288]' />
                                       </div>
                                       <div className='col-span-10 px-4'>
-                                        <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} $SOL</p>
+                                        <p className='lg:text-sm text-[3vw] leading-5 lg:leading-6 text-white font-extrabold'>Failed pending bet for {n?.amount} ${cryptoCurrency}</p>
                                         <p className='lg:text-sm semi-bold text-white text-[9px] leading-3 lg:leading-6'>Solana network failed transaction. Dont worry! Click retry to try again 👉</p>
                                       </div>
                                       <div className='col-span-1'>

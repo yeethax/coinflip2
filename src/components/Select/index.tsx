@@ -28,7 +28,7 @@ const cryptos = [
     avatar: CrekImage,
   },
   {
-    id: 3,
+    id: 4,
     name: 'FORGE',
     avatar: ForgeImage,
   },
