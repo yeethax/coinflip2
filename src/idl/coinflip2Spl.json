@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "name": "coinflip2Spl",
+  "name": "coinflip2",
   "instructions": [
     {
       "name": "initializeSpl",
@@ -410,12 +410,12 @@
             "type": "u64"
           },
           {
-            "name": "partner",
-            "type": "string"
+            "name": "mint",
+            "type": "publicKey"
           },
           {
-            "name": "spltoken",
-            "type": "publicKey"
+            "name": "partner",
+            "type": "string"
           }
         ]
       }
@@ -472,8 +472,5 @@
       "name": "MinBetAmount",
       "msg": "Bet amount below minimum bet amount"
     }
-  ],
-  "metadata": {
-    "address": "5crreuTzoftUMAhL815E5WDuT2obk7cLstA2fmkEz5u7"
-  }
+  ]
 }

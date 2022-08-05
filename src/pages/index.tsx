@@ -6,7 +6,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { AnchorProvider, BN, Program, web3 } from '@project-serum/anchor';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { ConfirmOptions, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { ConfirmOptions, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 
 import Layout from '@/components/layout/Layout';
 import NextImage from '@/components/NextImage';
@@ -183,6 +183,13 @@ export default function HomePage() {
     //   // Scroll down to the bottom of the list
     // }
   };
+
+  // const getBalanceSpl = async (connection: web3.Connection, playerATokStr: string) => {
+  //   const playerATok = new PublicKey(playerATokStr);
+  //   let balance = await connection.getTokenAccountBalance(playerATok);
+  //   return parseInt(balance.value.amount) / LAMPORTS_PER_SOL //we assume same precision as SOL
+
+  // }
 
   const handleAmountChange = (event: any) => {
     const value = event.target.value;
