@@ -94,7 +94,8 @@ const opts: ConfirmOptions = {
 };
 
 // const Api_Url = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://justcoinflip.herokuapp.com'
-const Api_Url = 'https://justcoinflip-test.herokuapp.com'
+
+const Api_Url = process.env.NEXT_PUBLIC_API_URL
 const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
 const programIdSpl = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID_SPL!);
 
