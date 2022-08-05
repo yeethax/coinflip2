@@ -399,9 +399,11 @@ export const AppProvider = ({ children }: Prop) => {
 
       let gameIdStr = gameId;
       let optsStr = 'confirmed';
+      let currency = "SOL";
+      let playerATokStr = "";
       const response = await fetch(`${Api_Url}/makeBet`, {
         method: 'POST',
-        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds }),
+        body: JSON.stringify({ gameIdStr, gambler, optsStr, amount, multiplier, odds, currency, playerATokStr }),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
